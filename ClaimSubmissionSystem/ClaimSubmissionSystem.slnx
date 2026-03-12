@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ClaimSubmission.API/ClaimSubmission.API.csproj" />
+  <Project Path="ClaimSubmission.Web/ClaimSubmission.Web.csproj" />
+</Solution>
