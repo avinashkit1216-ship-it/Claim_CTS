@@ -1,8 +1,64 @@
 {
   "version": 2,
-  "dgSpecHash": "57WbGiJKkC0=",
+  "dgSpecHash": "65GPa/NECig=",
   "success": true,
   "projectFilePath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/ClaimSubmission.Web.csproj",
-  "expectedPackageFiles": [],
-  "logs": []
+  "expectedPackageFiles": [
+    "/home/codespace/.nuget/packages/microsoft.aspnet.mvc/5.2.6/microsoft.aspnet.mvc.5.2.6.nupkg.sha512",
+    "/home/codespace/.nuget/packages/microsoft.aspnet.razor/3.2.6/microsoft.aspnet.razor.3.2.6.nupkg.sha512",
+    "/home/codespace/.nuget/packages/microsoft.aspnet.webpages/3.2.6/microsoft.aspnet.webpages.3.2.6.nupkg.sha512",
+    "/home/codespace/.nuget/packages/microsoft.web.infrastructure/1.0.0/microsoft.web.infrastructure.1.0.0.nupkg.sha512",
+    "/home/codespace/.nuget/packages/system.configuration.configurationmanager/10.0.5/system.configuration.configurationmanager.10.0.5.nupkg.sha512",
+    "/home/codespace/.nuget/packages/system.security.cryptography.protecteddata/10.0.5/system.security.cryptography.protecteddata.10.0.5.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "Package 'Microsoft.AspNet.Mvc 5.2.6' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "projectPath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/ClaimSubmission.Web.csproj",
+      "warningLevel": 1,
+      "filePath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/ClaimSubmission.Web.csproj",
+      "libraryId": "Microsoft.AspNet.Mvc",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "Package 'Microsoft.AspNet.Razor 3.2.6' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "projectPath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/ClaimSubmission.Web.csproj",
+      "warningLevel": 1,
+      "filePath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/ClaimSubmission.Web.csproj",
+      "libraryId": "Microsoft.AspNet.Razor",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "Package 'Microsoft.AspNet.WebPages 3.2.6' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "projectPath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/ClaimSubmission.Web.csproj",
+      "warningLevel": 1,
+      "filePath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/ClaimSubmission.Web.csproj",
+      "libraryId": "Microsoft.AspNet.WebPages",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "Package 'Microsoft.Web.Infrastructure 1.0.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "projectPath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/ClaimSubmission.Web.csproj",
+      "warningLevel": 1,
+      "filePath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/ClaimSubmission.Web.csproj",
+      "libraryId": "Microsoft.Web.Infrastructure",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }
