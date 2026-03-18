@@ -34,67 +34,69 @@
 
     @if (Model.Tasks.Any())
     {
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Title</th>
-                        <th>Description</th>
-                        <th>Status</th>
-                        <th>Created</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var task in Model.Tasks)
-                    {
-                        <tr class="@(task.IsCompleted ? "table-success" : "")">
-                            <td>@task.Id</td>
-                            <td>
-                                <strong>@task.Title</strong>
-                            </td>
-                            <td>@task.Description</td>
-                            <td>
+        <div class="row">
+            @foreach (var task in Model.Tasks)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">@task.Title</h5>
                                 @if (task.IsCompleted)
                                 {
-                                    <span class="badge bg-success">Completed</span>
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle me-1"></i>Completed
+                                    </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-warning">Pending</span>
+                                    <span class="badge bg-warning">
+                                        <i class="bi bi-clock me-1"></i>Pending
+                                    </span>
                                 }
-                            </td>
-                            <td>@task.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                            <td>
-                                <a href="@Url.Action("Details", "Task", new { id = task.Id })" class="btn btn-sm btn-info">View</a>
-                                <a href="@Url.Action("Edit", "Task", new { id = task.Id })" class="btn btn-sm btn-warning">Edit</a>
-
-                                @if (!task.IsCompleted)
-                                {
-                                    <form action="@Url.Action("Complete", "Task", new { id = task.Id })" method="post" style="display:inline;">
-                                        <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Mark as completed?');">
-                                            Complete
+                            </div>
+                            <p class="card-text text-muted">@(string.IsNullOrEmpty(task.Description) ? "No description" : task.Description)</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar me-1"></i>@task.CreatedAt.ToString("MMM dd, yyyy")
+                                </small>
+                                <div>
+                                    <a href="@Url.Action("Details", "Task", new { id = task.Id })" class="btn btn-sm btn-outline-primary me-1" title="View">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="@Url.Action("Edit", "Task", new { id = task.Id })" class="btn btn-sm btn-outline-warning me-1" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    @if (!task.IsCompleted)
+                                    {
+                                        <form action="@Url.Action("Complete", "Task", new { id = task.Id })" method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-outline-success me-1" onclick="return confirm('Mark as completed?');" title="Complete">
+                                                <i class="bi bi-check2"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    <form action="@Url.Action("Delete", "Task", new { id = task.Id })" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?');" title="Delete">
+                                            <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
-                                }
-
-                                <form action="@Url.Action("Delete", "Task", new { id = task.Id })" method="post" style="display:inline;">
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">
-                                        Delete
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     }
     else
     {
-        <div class="alert alert-info">
-            No tasks found. <a href="@Url.Action("Create", "Task")">Create one</a>!
+        <div class="text-center py-5">
+            <i class="bi bi-inbox display-1 text-muted mb-3"></i>
+            <h3 class="text-muted">No tasks yet</h3>
+            <p class="text-muted">Create your first task to get started.</p>
+            <a href="@Url.Action("Create", "Task")" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Create Task
+            </a>
         </div>
     }
 </div>

@@ -1,0 +1,11 @@
+@model string
+@inject Microsoft.AspNetCore.Mvc.ViewFeatures.IModelExpressionProvider ModelExpressionProvider
+
+@if (!string.IsNullOrEmpty(Model))
+{
+    <div class="alert alert-info alert-dismissible fade show animate-fade-in" role="alert">
+        <i class="bi bi-info-circle me-2"></i>
+        @Model
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}

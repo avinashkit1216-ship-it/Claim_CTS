@@ -1,0 +1,1757 @@
+=================================================================================
+                    TASK MANAGEMENT SYSTEM - COMPREHENSIVE ANALYSIS
+=================================================================================
+
+PROJECT OVERVIEW
+================================================================================
+The Task Management System is an enterprise-level learning project demonstrating
+Clean Architecture principles in .NET. It showcases:
+
+✓ 6-Layer Clean Architecture (Presentation, Application, Infrastructure, Domain)
+✓ Clean Separation of Concerns (SoC)
+✓ Dependency Injection (DI) - Inversion of Control (IoC)
+✓ Repository Pattern for data abstraction
+✓ Service Layer pattern for business logic
+✓ Data Transfer Objects (DTOs) for API contracts
+✓ Input validation with custom validators
+✓ Unit and Integration testing with mocks
+✓ REST API + MVC Web Application
+✓ Entity Framework Core with In-Memory Database
+
+Target: Demonstrate how to build scalable, testable, maintainable applications
+Technology Stack: ASP.NET Core, C#, Entity Framework Core, xUnit, Moq
+
+=================================================================================
+FOLDER STRUCTURE & ARCHITECTURE LAYERS
+=================================================================================
+
+Clean Architecture relies on "Dependency Inversion" - dependencies flow INWARD:
+
+        ┌──────────────────────────────────────────────────────────┐
+        │  PRESENTATION LAYERS (User Interface)                    │
+        │  ├─ TaskManagement.API (REST Endpoints)                 │
+        │  └─ TaskManagement.Web (MVC/Razor Views)                │
+        └──────────────────────────────────────────────────────────┘
+                           ↓ (depends on)
+        ┌──────────────────────────────────────────────────────────┐
+        │  APPLICATION LAYER (Business Logic)                      │
+        │  └─ TaskManagement.Application                           │
+        │     ├─ Services (orchestration)                          │
+        │     ├─ DTOs (data contracts)                             │
+        │     ├─ Validators (input validation)                     │
+        │     └─ Interfaces (contracts)                            │
+        └──────────────────────────────────────────────────────────┘
+                           ↓ (depends on)
+        ┌──────────────────────────────────────────────────────────┐
+        │  INFRASTRUCTURE LAYER (Data Access)                      │
+        │  └─ TaskManagement.Infrastructure                        │
+        │     ├─ Repositories (data access)                        │
+        │     └─ DbContext (Entity Framework)                      │
+        └──────────────────────────────────────────────────────────┘
+                           ↓ (depends on)
+        ┌──────────────────────────────────────────────────────────┐
+        │  DOMAIN LAYER (Business Rules - INNERMOST)               │
+        │  └─ TaskManagement.Domain                                │
+        │     ├─ Entities (core business objects)                  │
+        │     ├─ Enums (business enumerations)                     │
+        │     └─ Interfaces (contracts)                            │
+        └──────────────────────────────────────────────────────────┘
+
+        ┌──────────────────────────────────────────────────────────┐
+        │  SHARED LAYER (Cross-Cutting Concerns)                   │
+        │  └─ TaskManagement.Shared                                │
+        │     ├─ Exceptions (custom)                               │
+        │     ├─ Constants (app-wide)                              │
+        │     ├─ Extensions (helper methods)                       │
+        │     └─ Helpers (utilities)                               │
+        └──────────────────────────────────────────────────────────┘
+
+        ┌──────────────────────────────────────────────────────────┐
+        │  TESTING LAYER (Quality Assurance)                       │
+        │  ├─ TaskManagement.UnitTests                             │
+        │  └─ TaskManagement.IntegrationTests                      │
+        └──────────────────────────────────────────────────────────┘
+
+=================================================================================
+DETAILED FILE ANALYSIS
+=================================================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOMAIN LAYER (Business Rules & Entities)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FILE: TaskManagement.Domain/Entities/TaskItem.cs
+─────────────────────────────────────────────────
+PURPOSE:
+  Core business entity representing a task/todo item. This is the heart of the 
+  domain layer and contains only business logic, with ZERO dependencies on 
+  external frameworks.
+
+KEY PROPERTIES:
+  • Id (int): Primary key
+  • Title (string): Required, task name
+  • Description (string?): Optional description
+  • IsCompleted (bool): Task completion status
+  • CreatedAt (DateTime): When task was created
+  • UpdatedAt (DateTime?): When task was last modified
+
+KEY METHODS:
+  • MarkAsCompleted(): Business logic to mark task as done, updates timestamp
+  • Update(title, description): Updates task with validation
+
+PATTERNS USED:
+  ✓ Entity Pattern: Pure business object
+  ✓ Aggregate Root: TaskItem manages its own state
+  ✓ Value Objects: Primitive types for fields
+
+DEPENDENCIES:
+  → None (0 external dependencies - independent & testable)
+
+WHY SEPARATE:
+  - Can use in console apps, mobile, or any .NET application
+  - Business logic is protected from framework concerns
+  - Easy to unit test without mocking
+  - Changes in database strategy don't affect entity
+
+CONNECTIONS:
+  ← Used by: ITaskRepository, TaskService, Validators
+  ← Used by: Tests (unit tests can instantiate directly)
+
+
+FILE: TaskManagement.Domain/Enums/TaskStatus.cs
+────────────────────────────────────────────────
+PURPOSE:
+  Enumeration representing task states in the business domain.
+  Defines valid statuses: Todo (0), InProgress (1), Completed (2), OnHold (3)
+
+CURRENT STATUS: Defined but not implemented in TaskItem
+  (TaskItem uses bool IsCompleted instead)
+
+PATTERN USED:
+  ✓ Enum Pattern: Type-safe state representation
+
+IMPROVEMENT NOTE:
+  Consider refactoring TaskItem to use TaskStatus enum instead of IsCompleted 
+  boolean for better state management and future extensibility.
+
+
+FILE: TaskManagement.Domain/Interfaces/ITaskRepository.cs
+──────────────────────────────────────────────────────────
+PURPOSE:
+  Contract (interface) defining what operations must be available for 
+  persisting tasks. This is the CRITICAL INVERSION OF CONTROL point.
+
+METHODS DEFINED:
+  READ Operations:
+    • GetByIdAsync(int id): Fetch single task
+    • GetAllAsync(): Fetch all tasks
+    • GetCompletedAsync(): Fetch only completed tasks
+
+  WRITE Operations:
+    • CreateAsync(TaskItem): Insert new task
+    • UpdateAsync(TaskItem): Modify existing task
+    • DeleteAsync(int id): Remove task
+
+  UTILITY:
+    • SaveChangesAsync(): Commit pending changes
+
+WHY AN INTERFACE:
+  ✓ Allows multiple implementations (SQL Server, MySQL, InMemory, MongoDB, etc.)
+  ✓ Enables testing with mock repositories
+  ✓ Decouples business logic from database details
+  ✓ Follows Dependency Inversion Principle (depend on abstractions, not concretions)
+
+PATTERN USED:
+  ✓ Repository Pattern: Abstraction over data access
+  ✓ Async Pattern: All methods return Task<T>
+
+CONNECTIONS:
+  → Implemented by: TaskRepository (Infrastructure)
+  ← Used by: TaskService (Application), Tests
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SHARED LAYER (Cross-Cutting Concerns)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FILE: TaskManagement.Shared/Constants/AppConstants.cs
+───────────────────────────────────────────────────────
+PURPOSE:
+  Application-wide constants used across all layers.
+  Single source of truth for business rules and messages.
+
+CONSTANTS DEFINED:
+  VALIDATION RULES:
+    • TaskTitleMinLength = 3
+    • TaskTitleMaxLength = 200
+    • TaskDescriptionMaxLength = 1000
+
+  ERROR MESSAGES:
+    • TaskNotFoundMessage = "Task with ID {0} not found"
+    • InvalidTitleMessage = "Task title must be between 3 and 200 characters"
+    • TaskAlreadyCompletedMessage = "Task is already completed"
+
+  SUCCESS MESSAGES:
+    • TaskCreatedSuccessfully = "Task created successfully"
+    • TaskUpdatedSuccessfully = "Task updated successfully"
+    • TaskDeletedSuccessfully = "Task deleted successfully"
+
+BENEFITS:
+  ✓ Change validation rules once, affects entire app
+  ✓ Consistency in error messages
+  ✓ Easy to maintain and update
+  ✓ No magic strings scattered throughout code
+
+CONNECTIONS:
+  ← Used by: TaskValidator, ValidationHelper, TaskService, Controllers
+
+
+FILE: TaskManagement.Shared/Exceptions/CustomExceptions.cs
+────────────────────────────────────────────────────────────
+PURPOSE:
+  Custom domain-specific exceptions for consistent error handling.
+
+EXCEPTIONS DEFINED:
+  1. NotFoundException(string message)
+     - Thrown when entity doesn't exist (e.g., task not found)
+     - Used in: Repository, Service, Controller
+
+  2. ValidationException(string message)
+     - Thrown when business rules violated
+     - Used in: Validator, Service
+
+  3. ApplicationException(string message)
+     - General application-level errors
+     - Can be extended for specific scenarios
+
+PATTERN USED:
+  ✓ Custom Exception Pattern: Domain-specific error handling
+  ✓ Follows single responsibility (meaningful exception types)
+
+BENEFIT:
+  Controllers can catch specific exceptions and return appropriate HTTP statuses
+  (NotFoundException → 404, ValidationException → 400)
+
+CONNECTIONS:
+  ← Used by: TaskService, TaskValidator, Controllers, Tests
+
+
+FILE: TaskManagement.Shared/Helpers/ValidationHelper.cs
+─────────────────────────────────────────────────────────
+PURPOSE:
+  Centralized validation utilities for task data.
+  Reusable validation logic across layers.
+
+METHODS PROVIDED:
+  1. IsValidTaskTitle(string title)
+     - Validates: not null/whitespace, length 3-200 chars
+     - Used by: TaskValidator
+
+  2. IsValidTaskDescription(string? description)
+     - Validates: optional, but max 1000 chars if provided
+     - Used by: TaskValidator
+
+PATTERN USED:
+  ✓ Helper/Utility Pattern: Static methods for common operations
+  ✓ Reusable validation: Single source of truth
+
+CONNECTIONS:
+  ← Used by: TaskValidator
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+APPLICATION LAYER (Business Logic & Orchestration)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FILE: TaskManagement.Application/DTOs/TaskDto.cs
+─────────────────────────────────────────────────
+PURPOSE:
+  Data Transfer Objects separate API contracts from domain entities.
+  Clients NEVER see internal entity structure.
+
+DTO CLASSES:
+  1. TaskDto (Read Model)
+     - Id, Title, Description, IsCompleted
+     - CreatedAt, UpdatedAt timestamps
+     - Returned from GET operations
+
+  2. CreateTaskDto (Write Model)
+     - Only Title (required) and Description (optional)
+     - Used in POST /api/tasks
+     - Excludes Id, timestamps (server-generated)
+
+  3. UpdateTaskDto (Write Model)
+     - Title (required) and Description (optional)
+     - Used in PUT /api/tasks/{id}
+     - Excludes Id, timestamps
+
+WHY USE DTOs:
+  ✓ Security: Don't expose internal properties
+  ✓ Flexibility: Change entity without breaking API
+  ✓ Clarity: Define exactly what clients send/receive
+  ✓ Validation: Input validation at API boundary
+  ✓ Performance: Include only needed fields
+
+PATTERN USED:
+  ✓ DTO Pattern (Data Transfer Object)
+  ✓ Separation of concerns: Entity ≠ API Contract
+
+MAPPING:
+  Infrastructure: Database (TaskItem) → Application (DTO) → Client (JSON)
+
+CONNECTIONS:
+  → Used by: Services, Controllers, Tests
+  ← Mapped from: TaskItem entities
+
+
+FILE: TaskManagement.Application/Interfaces/ITaskService.cs
+────────────────────────────────────────────────────────────
+PURPOSE:
+  Contract defining business operations available for tasks.
+  Enables testing with mock services.
+
+OPERATIONS DEFINED:
+
+  COMMAND Operations (Modify Data):
+    • CreateTaskAsync(CreateTaskDto): Creates new task
+    • UpdateTaskAsync(int id, UpdateTaskDto): Modifies existing
+    • DeleteTaskAsync(int id): Removes task
+    • MarkTaskAsCompletedAsync(int id): Special update (complete)
+
+  QUERY Operations (Read Data):
+    • GetTaskByIdAsync(int id): Fetch single task
+    • GetAllTasksAsync(): Fetch all tasks
+    • GetCompletedTasksAsync(): Fetch completed tasks only
+
+PATTERN USED:
+  ✓ Service Interface Pattern: Contract for business logic
+  ✓ Command/Query Separation: Distinguish modify vs read operations
+  ✓ Async Pattern: All operations non-blocking
+
+BENEFITS:
+  ✓ Controllers depend on interface, not implementation
+  ✓ Easy to mock for testing
+  ✓ Can swap implementation without affecting callers
+
+CONNECTIONS:
+  → Implemented by: TaskService
+  ← Used by: TasksController, TaskController (Web), Tests
+
+
+FILE: TaskManagement.Application/Services/TaskService.cs
+──────────────────────────────────────────────────────────
+PURPOSE:
+  Core business logic orchestration. Coordinates between controllers, 
+  validators, and repository. This is the "brain" of the application.
+
+DEPENDENCIES INJECTED:
+  • ITaskRepository: Data access abstraction
+  • TaskValidator: Input validation
+
+FLOW FOR EACH OPERATION:
+
+  CreateTask Flow:
+    1. Validate input using TaskValidator
+    2. Throw ValidationException if invalid
+    3. Create TaskItem entity
+    4. Call repository.CreateAsync()
+    5. Map entity to TaskDto
+    6. Return TaskDto to controller
+
+  UpdateTask Flow:
+    1. Validate input
+    2. Fetch existing task (throw NotFoundException if not found)
+    3. Call task.Update() (entity's business logic)
+    4. Call repository.UpdateAsync()
+    5. Map to DTO and return
+
+  DeleteTask Flow:
+    1. Check if task exists (throw NotFoundException if not)
+    2. Call repository.DeleteAsync()
+    3. Return boolean success
+
+  MarkAsCompletedTask Flow:
+    1. Fetch task (throw NotFoundException if not found)
+    2. Call task.MarkAsCompleted() (uses entity's method)
+    3. Call repository.UpdateAsync()
+    4. Return DTO
+
+  GetAllTasks Flow:
+    1. Fetch all from repository
+    2. Map each entity to DTO
+    3. Return collection
+
+KEY CHARACTERISTICS:
+  ✓ Depends on Domain + Shared (inward dependencies only)
+  ✓ NO dependencies on Infrastructure or Presentation
+  ✓ All public methods are async
+  ✓ Delegates validation to TaskValidator
+  ✓ Delegates data access to ITaskRepository
+  ✓ Maps entities to DTOs before returning
+
+PATTERN USED:
+  ✓ Service Layer: Orchestrates business logic
+  ✓ Dependency Injection: Receives collaborators via constructor
+  ✓ Error Handling: Throws domain exceptions
+
+WHAT MAKES THIS CLEAN:
+  - Business logic is separate from HTTP concerns
+  - Can test without database using mock repository
+  - Can test without HTTP using dependency injection
+  - High cohesion (one purpose: task operations)
+  - Loose coupling (depends on interfaces, not implementations)
+
+CONNECTIONS:
+  → Depends on: ITaskRepository, TaskValidator, Domain.Entities
+  ← Used by: Controllers (API and Web), Tests
+
+
+FILE: TaskManagement.Application/Validators/TaskValidator.cs
+──────────────────────────────────────────────────────────────
+PURPOSE:
+  Encapsulates input validation logic for task operations.
+  Keeps validation rules in one place for reusability.
+
+VALIDATION METHODS:
+
+  ValidateCreate(CreateTaskDto):
+    1. Validate title using ValidationHelper.IsValidTaskTitle()
+    2. Validate description using ValidationHelper.IsValidTaskDescription()
+    3. Return ValidationResult (IsValid + ErrorMessage)
+
+  ValidateUpdate(UpdateTaskDto):
+    1. Same validation rules as create
+    2. Returns ValidationResult
+
+VALIDATION RULES:
+  • Title: Required, 3-200 characters
+  • Description: Optional, max 1000 characters
+
+PATTERN USED:
+  ✓ Validator Pattern: Encapsulated validation logic
+  ✓ Result Pattern: Returns result object instead of throwing
+
+WHY SEPARATE:
+  ✓ Reusable across services
+  ✓ Easy to test validation independently
+  ✓ Single responsibility (only validates)
+  ✓ Easy to modify rules
+
+CONNECTIONS:
+  → Uses: AppConstants, ValidationHelper
+  ← Used by: TaskService, Tests
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INFRASTRUCTURE LAYER (Data Access & External Services)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FILE: TaskManagement.Infrastructure/Data/DbContext/ApplicationDbContext.cs
+──────────────────────────────────────────────────────────────────────────
+PURPOSE:
+  Entity Framework Core configuration. Maps C# entities to database tables.
+  This is the bridge between domain objects and relational database.
+
+INHERITS FROM:
+  DbContext (Entity Framework Core base class)
+
+PROPERTIES:
+  DbSet<TaskItem> Tasks: Represents Tasks table in database
+
+CONFIGURATION IN OnModelCreating():
+
+  Table Configuration for TaskItem:
+    • Primary Key: Id
+    • Title: Required, max 200 chars
+    • Description: Max 1000 chars (nullable)
+    • IsCompleted: Default value = false
+    • CreatedAt: Default to current UTC time (GETUTCDATE())
+    • Index: Created on IsCompleted column for query performance
+
+  Seed Data: 
+    • Two sample tasks inserted on database creation
+    • Demonstrates how database is initialized
+
+DATABASE TYPE:
+  Currently: In-Memory Database (for learning/testing)
+  Production: Can easily switch to SQL Server, MySQL, PostgreSQL
+
+PATTERN USED:
+  ✓ DbContext Pattern: EF Core's data access abstraction
+  ✓ Fluent Configuration: OnModelCreating() setup
+  ✓ Seed Data: Initial data population
+
+KEY FEATURES:
+  ✓ Auto-generates migration scripts
+  ✓ Provides LINQ support for queries
+  ✓ Handles change tracking
+  ✓ Manages database connections
+
+CONNECTIONS:
+  → Used by: TaskRepository, Program.cs (DI configuration)
+  ← Configured with: TaskItem entities
+
+
+FILE: TaskManagement.Infrastructure/Repositories/TaskRepository.cs
+────────────────────────────────────────────────────────────────────
+PURPOSE:
+  Implements ITaskRepository interface. Encapsulates all database access 
+  logic for tasks. This is the only place that knows about Entity Framework.
+
+IMPLEMENTS: ITaskRepository
+
+METHODS & IMPLEMENTATIONS:
+
+  GetByIdAsync(int id):
+    Query: _context.Tasks.FirstOrDefaultAsync(t => t.Id == id)
+    Return: Single TaskItem or null
+    Used by: Update, Delete operations
+
+  GetAllAsync():
+    Query: Fetch all tasks, ordered by CreatedAt descending
+    Return: IEnumerable<TaskItem>
+    Used by: List all tasks endpoint
+
+  GetCompletedAsync():
+    Query: WHERE IsCompleted = true, order by UpdatedAt descending
+    Return: IEnumerable<TaskItem>
+    Used by: Filter completed tasks endpoint
+
+  CreateAsync(TaskItem task):
+    Actions: 
+      1. _context.Tasks.Add(task)
+      2. await _context.SaveChangesAsync()
+    Return: Created TaskItem with generated Id
+
+  UpdateAsync(TaskItem task):
+    Actions:
+      1. _context.Tasks.Update(task)
+      2. await _context.SaveChangesAsync()
+    Return: Updated TaskItem
+    Note: EF Core tracks changes automatically
+
+  DeleteAsync(int id):
+    Actions:
+      1. Fetch task by id
+      2. If exists: Remove and save
+      3. If not: Return false
+    Return: True if deleted, False if not found
+
+  SaveChangesAsync():
+    Explicit save method for manual change management
+    Return: Number of rows affected
+
+WHY SEPARATE FROM DOMAIN:
+  ✓ Domain layer has NO database knowledge
+  ✓ Can swap database implementation without changing business logic
+  ✓ Infrastructure is testable with mock DbContext
+  ✓ Isolates EF Core details
+
+PATTERN USED:
+  ✓ Repository Pattern: Encapsulates data access
+  ✓ Async All The Way: Every operation is async
+  ✓ Null Handling: Returns null instead of throwing
+  ✓ Change Tracking: EF Core handles change detection
+
+PERFORMANCE CONSIDERATIONS:
+  ✓ Index on IsCompleted column for filtered queries efficiency
+  ✓ Eager loading: GetByIdAsync is simple (no includes)
+  ✓ Could add: Include() for related entities if needed
+
+CONNECTIONS:
+  → Implements: ITaskRepository (Domain)
+  → Depends on: ApplicationDbContext
+  ← Used by: TaskService, Tests (with mocks)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRESENTATION LAYER - API (REST Endpoints)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FILE: TaskManagement.API/Program.cs
+────────────────────────────────────────
+PURPOSE:
+  Application startup configuration. Sets up Dependency Injection, 
+  database, middleware, and routing.
+
+KEY CONFIGURATIONS:
+
+  1. SERVICE REGISTRATION (Dependency Injection):
+     Services.AddControllers()              → Enable API controllers
+     Services.AddDbContext()                → Register EF Core with in-memory DB
+     Services.AddScoped<ITaskRepository, TaskRepository>  → Repository
+     Services.AddScoped<TaskValidator>                    → Validator
+     Services.AddScoped<ITaskService, TaskService>        → Service
+     Services.AddEndpointsApiExplorer()     → API metadata
+     Services.AddSwaggerGen()               → API documentation
+
+  2. DATABASE INITIALIZATION:
+     dbContext.Database.EnsureCreated()    → Create DB and seed data on startup
+
+  3. MIDDLEWARE CONFIGURATION:
+     UseSwagger()                           → Enable Swagger UI at /swagger
+     UseSwaggerUI()                         → Interactive API documentation
+     UseHttpsRedirection()                  → Force HTTPS
+     UseAuthorization()                     → Auth checks
+     MapControllers()                       → Route attribute-based controllers
+
+HOW DEPENDENCY INJECTION WORKS:
+  Example: When TasksController requests ITaskService:
+    1. Controller constructor: public TasksController(ITaskService taskService)
+    2. ASP.NET Core's DI container checks registrations
+    3. Finds: services.AddScoped<ITaskService, TaskService>()
+    4. TaskService needs ITaskRepository and TaskValidator
+    5. Finds both in registrations
+    6. Creates: TaskService(taskRepository, taskValidator)
+    7. Injects into controller
+    8. Request is handled
+
+PATTERN USED:
+  ✓ Composition Root: Program.cs is where dependencies are composed
+  ✓ Dependency Injection: Loose coupling between components
+  ✓ Service Locator: DI container resolves dependencies
+
+STARTUP FLOW:
+  Program.cs → Builds WebApplication → Configures middleware → Listens for requests
+
+CONNECTION TO LAYERS:
+  → Registers: TaskManagement.Application (Services, Validators)
+  → Registers: TaskManagement.Infrastructure (Repository, DbContext)
+  ← Controllers depend on registered services
+
+
+FILE: TaskManagement.API/Controllers/TasksController.cs
+───────────────────────────────────────────────────────
+PURPOSE:
+  Handles HTTP REST requests for task operations.
+  Converts HTTP requests → service calls → HTTP responses.
+
+REST ENDPOINTS:
+  [ApiController]
+  [Route("api/[controller]")]  → "api/tasks"
+
+  ENDPOINTS DEFINED:
+
+  1. GET /api/tasks
+     Method: GetAllTasks()
+     Returns: 200 OK with list of TaskDto
+     Handles: Fetch all tasks
+
+  2. GET /api/tasks/{id}
+     Method: GetTaskById(int id)
+     Returns: 200 OK + TaskDto OR 404 Not Found
+     Handles: Fetch single task
+
+  3. POST /api/tasks
+     Method: CreateTask(CreateTaskDto)
+     Returns: 201 Created + TaskDto + Location header
+     Body: { "title": "...", "description": "..." }
+     Handles: Create new task
+
+  4. PUT /api/tasks/{id}
+     Returns: 200 OK + updated TaskDto OR 400/404
+     Handles: Update existing task
+
+  5. DELETE /api/tasks/{id}
+     Returns: 204 No Content OR 404 Not Found
+     Handles: Delete task
+
+  6. PUT /api/tasks/{id}/complete
+     Returns: 200 OK + TaskDto
+     Handles: Mark task as completed
+
+DEPENDENCY INJECTION:
+  Constructor: public TasksController(ITaskService taskService)
+  DI Container provides implementation automatically
+  Loose coupling: Controller depends on interface, not concrete class
+
+ERROR HANDLING:
+  try-catch blocks catch exceptions:
+    • ValidationException → 400 Bad Request
+    • NotFoundException → 404 Not Found
+    • Other exceptions → 500 Internal Server Error
+
+RESPONSE TYPE DOCUMENTATION:
+  [ProducesResponseType(typeof(TaskDto), StatusCodes.Status200OK)]
+  [ProducesResponseType(StatusCodes.Status404NotFound)]
+  These attributes document API for Swagger
+
+PATTERN USED:
+  ✓ REST API Pattern: HTTP methods map to CRUD operations
+  ✓ Dependency Injection: Service injected via constructor
+  ✓ Exception Handling: Converts domain exceptions to HTTP responses
+  ✓ API Documentation: ProducesResponseType attributes
+
+HTTP STATUS CODES:
+  200 OK              → Operation successful
+  201 Created         → Resource created, returns Location header
+  204 No Content      → Operation successful, no body to return
+  400 Bad Request     → Validation error
+  404 Not Found       → Resource doesn't exist
+  500 Server Error    → Unexpected error
+
+KEY RESPONSIBILITY:
+  ✓ Accept HTTP requests
+  ✓ Validate basic input (ModelState)
+  ✓ Delegate to service
+  ✓ Catch domain exceptions
+  ✓ Return appropriate HTTP responses
+  ✗ NOT: Handle business logic (that's service layer)
+  ✗ NOT: Access database (that's repository layer)
+
+CONNECTIONS:
+  → Depends on: ITaskService (Application layer)
+  ← Called by: HTTP clients (browsers, mobile apps, other services)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PRESENTATION LAYER - WEB (MVC + Razor Views)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FILE: TaskManagement.Web/Controllers/TaskController.cs
+─────────────────────────────────────────────────────
+PURPOSE:
+  Alternative presentation layer for web browsers (MVC pattern).
+  Returns HTML views instead of JSON.
+
+CONTROLLER ACTIONS (HTTP Handlers):
+
+  Index():
+    • GET: /Task
+    • Fetches all tasks from service
+    • Creates TaskListViewModel with task list
+    • Returns View with TaskListViewModel
+    • Browser displays HTML list of tasks
+
+  Details(int id):
+    • GET: /Task/Details/5
+    • Fetches single task by id
+    • Returns 404/Not Found if not exists
+    • Returns View with TaskDto
+
+  Create() [GET]:
+    • GET: /Task/Create
+    • Displays empty form for creating new task
+    • Returns View with empty TaskFormViewModel
+
+  Create() [POST]:
+    • POST: /Task/Create
+    • Receives form data (Title, Description)
+    • Calls service to create
+    • Redirects to Index if success
+    • Returns View if validation fails
+
+  Edit() [GET & POST]:
+    • GET: /Task/Edit/5 → Show pre-filled form
+    • POST: /Task/Edit/5 → Update and redirect
+
+  Delete():
+    • POST/GET: /Task/Delete/5
+    • Calls service to delete
+    • Redirects to Index
+
+DIFFERENCE FROM API CONTROLLER:
+  API Controller:
+    ✓ Returns JSON (Content-Type: application/json)
+    ✓ Used by mobile apps, SPAs, other APIs
+    ✓ Stateless
+
+  Web Controller (MVC):
+    ✓ Returns HTML (Content-Type: text/html)
+    ✓ Used by web browsers
+    ✓ Can use sessions/cookies
+
+SHARED SERVICE LAYER:
+  Both API and Web controllers use the SAME TaskService
+  This demonstrates clean architecture benefits:
+    • Single business logic layer
+    • Multiple presentations of same data
+    • Easy to maintain consistency
+
+VIEWMODELS:
+  TaskListViewModel: Contains list of TaskDto for table view
+  TaskFormViewModel: Contains single TaskDto for edit form
+
+PATTERN USED:
+  ✓ MVC (Model-View-Controller): Separates concerns
+  ✓ ViewModel Pattern: Transform DTO for view display
+  ✓ Dependency Injection: TaskService injected
+
+CONNECTIONS:
+  → Depends on: ITaskService (same as API!)
+  → Uses: ViewModels (task-specific, not domain entities)
+  ← Returns: Views (Razor templates)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TESTING LAYER (Quality Assurance)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FILE: TaskManagement.UnitTests/TaskServiceTests.cs
+──────────────────────────────────────────────────
+PURPOSE:
+  Tests business logic in isolation (no database, no HTTP).
+  Uses mocks to simulate repository behavior.
+  Fast and focused on single component.
+
+TEST FRAMEWORK: xUnit
+TEST PATTERNS: Arrange-Act-Assert (AAA)
+
+TEST METHODS:
+
+  CreateTaskAsync_WithValidData_ShouldCreateTask():
+    ARRANGE:
+      1. Create valid CreateTaskDto
+      2. Mock repository to return created task
+    ACT:
+      1. Call service.CreateTaskAsync()
+    ASSERT:
+      1. Verify returned TaskDto matches input
+      2. Verify repository was called once
+
+  CreateTaskAsync_WithInvalidTitle_ShouldThrowValidationException():
+    ARRANGE:
+      1. Create CreateTaskDto with title "AB" (too short)
+    ACT:
+      1. Call service.CreateTaskAsync()
+    ASSERT:
+      1. Assert throws ValidationException
+      2. Exception message contains "Title"
+
+  UpdateTaskAsync_WithNonExistentId_ShouldThrowNotFoundException():
+    ARRANGE:
+      1. Mock repository returns null for non-existent id
+    ACT:
+      1. Call service.UpdateTaskAsync(999, ...)
+    ASSERT:
+      1. Assert throws NotFoundException
+
+MOCKING:
+  Mock<ITaskRepository> _mockRepository
+  Allows unit test to:
+    ✓ Avoid database
+    ✓ Control repository return values
+    ✓ Verify service calls repository
+
+WHY UNIT TESTS ARE VALUABLE:
+  ✓ Fast (~milliseconds)
+  ✓ Independent (no external dependencies)
+  ✓ Repeatable (same result every run)
+  ✓ Focused (test one thing)
+  ✓ Catch bugs early
+  ✓ Document expected behavior
+  ✓ Enable refactoring confidence
+
+PATTERN USED:
+  ✓ Unit Test Pattern: Test single component in isolation
+  ✓ Mock Pattern: Replace dependencies with mock implementations
+  ✓ Arrange-Act-Assert: Clear test structure
+
+CONNECTIONS:
+  → Tests: TaskService implementation
+  ← Uses: Mock<ITaskRepository> (no real database)
+
+
+FILE: TaskManagement.IntegrationTests/TasksControllerIntegrationTests.cs
+─────────────────────────────────────────────────────────────────────────
+PURPOSE:
+  Tests complete request → response cycle with real components.
+  Verifies data flows correctly through all layers.
+  Tests with actual in-memory database.
+
+TEST FRAMEWORK: xUnit
+TEST TOOL: WebApplicationFactory<Program>
+
+SETUP/TEARDOWN:
+  InitializeAsync():
+    1. Create WebApplicationFactory (spins up test server)
+    2. Create HttpClient for making requests
+  DisposeAsync():
+    1. Cleanup resources
+
+TEST METHODS:
+
+  GetAllTasks_ShouldReturnAllTasks():
+    1. Make HTTP GET /api/tasks
+    2. Assert status 200 OK
+    3. Deserialize response to IEnumerable<TaskDto>
+    4. Assert tasks list is not empty
+
+  CreateTask_WithValidData_ShouldCreateTask():
+    1. Prepare CreateTaskDto
+    2. Make HTTP POST /api/tasks with DTO as JSON
+    3. Assert status 201 Created
+    4. Deserialize response to TaskDto
+    5. Assert returned task matches input
+
+  CreateTask_WithInvalidTitle_ShouldReturnBadRequest():
+    1. Prepare CreateTaskDto with invalid data
+    2. Make HTTP POST /api/tasks
+    3. Assert status 400 Bad Request
+
+WHAT INTEGRATION TESTS VERIFY:
+  ✓ HTTP request routing works
+  ✓ DI container resolves all dependencies
+  ✓ Service layer executes correctly
+  ✓ Database operations work
+  ✓ DTOs serialize/deserialize correctly
+  ✓ Error handling returns correct HTTP status
+  ✓ Validation works end-to-end
+
+WHY INTEGRATION TESTS ARE VALUABLE:
+  ✓ Catch issues between layers
+  ✓ Test real database (in-memory)
+  ✓ Test serialization/deserialization
+  ✓ Test HTTP response codes
+  ✓ Test complete workflows
+
+PATTERN USED:
+  ✓ Integration Test Pattern: Test multiple layers together
+  ✓ Fixture Pattern: WebApplicationFactory provides test context
+  ✓ Black-box Testing: Test via HTTP only
+
+CONNECTIONS:
+  → Tests: Complete API layer
+  → Uses: Real TaskService, TaskRepository, DbContext
+  ← Uses: In-Memory database (no external DB needed)
+
+
+=================================================================================
+REQUEST FLOW THROUGH THE SYSTEM (Step-by-Step Walkthrough)
+=================================================================================
+
+Scenario: User creates a new task via REST API
+
+STEP 1: HTTP Request Arrives
+────────────────────────────
+POST /api/tasks
+Content-Type: application/json
+{
+  "title": "Learn Clean Architecture",
+  "description": "Understand layers and patterns"
+}
+
+Browser/Client → Network → Server
+
+STEP 2: ASP.NET Core Routes Request
+─────────────────────────────────
+  1. Route matching: POST /api/tasks → TasksController.CreateTask()
+  2. Model binding: JSON body → CreateTaskDto object
+  3. Query DI container for dependencies
+
+STEP 3: Dependency Injection Resolves Dependencies
+──────────────────────────────────────────────────
+  TasksController needs: ITaskService
+  Program.cs registered: AddScoped<ITaskService, TaskService>()
+  
+  ASP.NET Core builds object graph:
+    TasksController
+      ├── ITaskService → TaskService
+      │     ├── ITaskRepository → TaskRepository
+      │     │     └── ApplicationDbContext
+      │     └── TaskValidator
+      │           ├── ValidationHelper
+      │           └── AppConstants
+      └── (controller instantiated with all dependencies)
+
+STEP 4: Controller.CreateTask() Executes
+────────────────────────────────────────
+  File: TasksController.cs, CreateTask() method
+  
+  [HttpPost]
+  public async Task<IActionResult> CreateTask([FromBody] CreateTaskDto createTaskDto)
+  {
+    // Body validation check
+    if (!ModelState.IsValid)
+      return BadRequest(ModelState);
+    
+    try {
+      // Delegate to service
+      var createdTask = await _taskService.CreateTaskAsync(createTaskDto);
+      // Return 201 Created + Location header
+      return CreatedAtAction(nameof(GetTaskById), 
+        new { id = createdTask.Id }, createdTask);
+    }
+    catch (ValidationException ex) {
+      return BadRequest(ex.Message);
+    }
+  }
+
+STEP 5: Service.CreateTaskAsync() Validates & Processes
+────────────────────────────────────────────────────────
+  File: TaskService.cs, CreateTaskAsync() method
+  
+  // Step 1: Validate
+  var validationResult = _taskValidator.ValidateCreate(createTaskDto);
+  if (!validationResult.IsValid)
+    throw new ValidationException(validationResult.ErrorMessage);
+  
+  // Step 2: Create Domain Entity
+  var taskItem = new TaskItem
+  {
+    Title = createTaskDto.Title,
+    Description = createTaskDto.Description,
+    IsCompleted = false
+  };
+  
+  // Step 3: Persist via Repository
+  await _taskRepository.CreateAsync(taskItem);
+  
+  // Step 4: Map to DTO
+  return MapToDto(taskItem);
+
+STEP 6: Repository.CreateAsync() Saves to Database
+────────────────────────────────────────────────
+  File: TaskRepository.cs, CreateAsync() method
+  
+  // Add to EF Core change tracker
+  _context.Tasks.Add(task);
+  
+  // Flush to database (in-memory or SQL Server)
+  await _context.SaveChangesAsync();
+  
+  // Entity Framework Core:
+  // 1. Detects new entity
+  // 2. Generates INSERT statement
+  // 3. Executes against database
+  // 4. EF Core returns with generated Id
+  
+  return task; // Now has Id = 1 (or next available)
+
+STEP 7: Data Flows Back Through Layers
+──────────────────────────────────────
+  Repository returns TaskItem with generated Id
+    ↓
+  Service maps TaskItem → TaskDto
+    ↓
+  Controller returns CreatedAtAction()
+    ↓
+  ASP.NET Core serializes TaskDto to JSON
+    ↓
+  HTTP Response sent to client
+
+STEP 8: HTTP Response to Client
+────────────────────────────────
+Status Code: 201 Created
+Headers:
+  Location: /api/tasks/1
+  Content-Type: application/json
+
+Body:
+{
+  "id": 1,
+  "title": "Learn Clean Architecture",
+  "description": "Understand layers and patterns",
+  "isCompleted": false,
+  "createdAt": "2024-03-17T10:30:00Z",
+  "updatedAt": null
+}
+
+Browser/Client receives response → Processes data
+
+═════════════════════════════════════════════════════════════════════════════════
+
+Alternati e: GET All Tasks
+
+REQUEST: GET /api/tasks
+
+FLOW:
+  1. TasksController.GetAllTasks() called
+  2. Calls _taskService.GetAllTasksAsync()
+  3. Service calls _taskRepository.GetAllAsync()
+  4. Repository queries: SELECT * FROM Tasks ORDER BY CreatedAt DESC
+  5. EF Core maps database rows → TaskItem objects
+  6. Service maps each TaskItem → TaskDto
+  7. Controller returns 200 OK with list
+  8. Client receives JSON array of tasks
+
+RESPONSE: 200 OK
+[
+  { "id": 1, "title": "Learn Clean Architecture", ... },
+  { "id": 2, "title": "Setup Database", ... }
+]
+
+═════════════════════════════════════════════════════════════════════════════════
+
+Alternative: Web UI Flow
+
+REQUEST (via browser): GET /Task
+
+FLOW:
+  1. TaskController.Index() called
+  2. Calls _taskService.GetAllTasksAsync() [SAME SERVICE!]
+  3. Service returns IEnumerable<TaskDto>
+  4. Controller creates TaskListViewModel
+  5. Passes ViewModel to View()
+  6. Razor template renders HTML
+  7. Browser receives HTML
+
+RESPONSE: 200 OK (HTML)
+<table>
+  <tr><td>1</td><td>Learn Clean Architecture</td><td>False</td></tr>
+  <tr><td>2</td><td>Setup Database</td><td>False</td></tr>
+</table>
+
+KEY ADVANTAGE:
+  Both API and Web controllers use the SAME service layer!
+  Business logic is written once, used multiple ways.
+
+═════════════════════════════════════════════════════════════════════════════════
+
+Test Flow (Unit Test)
+
+  Test Setup:
+    1. Create Mock<ITaskRepository>
+    2. Create TaskValidator (real)
+    3. Create TaskService(mockRepository, validator)
+
+  Test Execution:
+    1. No HTTP involved
+    2. No database involved
+    3. Direct method call: _service.CreateTaskAsync(createTaskDto)
+    4. Mock repository returns predetermined value
+    5. Assert result matches expectations
+
+  Benefits:
+    ✓ Executes in milliseconds (no DB)
+    ✓ Focused on service logic only
+    ✓ Repeatable and deterministic
+
+═════════════════════════════════════════════════════════════════════════════════
+
+=================================================================================
+ARCHITECTURAL PATTERNS USED
+=================================================================================
+
+1. CLEAN ARCHITECTURE (Layered Architecture)
+   ────────────────────────────────────────────
+   Principle: Dependencies point INWARD
+   Benefit: Each layer ignorant of outer layers
+   
+   Dependency Diagram:
+     Controllers     (Web/API)
+        ↑ ↓
+     Services        (Application)
+        ↑ ↓
+     Repositories    (Infrastructure)
+        ↑ ↓
+     Entities        (Domain)
+
+2. REPOSITORY PATTERN
+   ─────────────────
+   What: ITaskRepository abstracts data access
+   Why: Swap database without changing business logic
+   How: Service depends on ITaskRepository interface
+   
+   Benefit: Can mock repository for testing
+
+3. Service Layer PATTERN
+   ────────────────────
+   What: TaskService orchestrates business operations
+   Why: Isolate business logic from controllers
+   How: Controllers delegate to services
+   
+   Benefit: Reusable logic for both API and Web
+
+4. DEPENDENCY INJECTION (Inversion of Control)
+   ──────────────────────────────────────────
+   What: Components receive dependencies, don't create them
+   How: ASP.NET Core DI container resolves dependencies
+   Why: Loose coupling, easy testing with mocks
+   
+   In Program.cs:
+     AddScoped<ITaskService, TaskService>()
+     AddScoped<ITaskRepository, TaskRepository>()
+
+5. DTO (Data Transfer Object) PATTERN
+   ────────────────────────────────────
+   What: TaskDto represents API contract
+   Why: Protect domain entity from external exposure
+   How: Map Entity → DTO before returning from API
+   
+   Benefit: Controllers never expose internal entity structure
+
+6. MAPPER PATTERN
+   ──────────────
+   What: MapToDto(TaskItem) converts entity to DTO
+   Why: Separate domain model from API representation
+   How: Private static method in service
+   
+   Benefit: Single source for Entity → DTO mapping logic
+
+7. VALIDATOR PATTERN
+   ──────────────────
+   What: TaskValidator encapsulates validation rules
+   Why: Reusable validation, testable in isolation
+   How: Service calls validator before creating entity
+   
+   Benefit: Easy to modify validation rules
+
+8. EXCEPTION-BASED ERROR HANDLING
+   ────────────────────────────────
+   What: Custom exceptions (NotFoundException, ValidationException)
+   Why: Controllers can catch specific exception types
+   How: throw new ValidationException() in service
+   Provider: Mapping to HTTP status codes in controller
+   
+   ValidationException → 400 Bad Request
+   NotFoundException → 404 Not Found
+
+9. ASYNC/AWAIT PATTERN
+   ────────────────────
+   What: All I/O operations are asynchronous
+   Why: Non-blocking, better performance
+   How: async/await keywords throughout
+   
+   Benefits:
+     ✓ Scalability: handle more concurrent requests
+     ✓ Resource efficiency: threads not blocked on I/O
+
+10. COMMAND/QUERY SEPARATION (CQRS-lite)
+    ───────────────────────────────────
+    Command Operations (modify data):
+      CreateTaskAsync(), UpdateTaskAsync(), DeleteTaskAsync()
+    
+    Query Operations (read data):
+      GetAllTasksAsync(), GetTaskByIdAsync()
+    
+    Benefit: Clear distinction of intent
+
+=================================================================================
+DATA FLOW VISUALIZATION
+=================================================================================
+
+CREATE REQUEST:
+┌─────────────┐
+│   Client    │ POST /api/tasks {"title": "...", "description": "..."}
+└──────┬──────┘
+       │
+       ▼
+┌────────────────────────────────────────┐
+│  ASP.NET Core Framework                 │
+│  • Route request to Controller          │
+│  • Resolve dependencies from DI        │
+└──────┬──────────────────────────────────┘
+       │
+       ▼
+┌────────────────────────────────────────┐
+│  TasksController.CreateTask()           │
+│  • Validate ModelState                 │
+│  • Call service                        │
+│  • Catch exceptions                    │
+│  • Return HTTP response               │
+└──────┬──────────────────────────────────┘
+       │ ITaskService
+       ▼
+┌────────────────────────────────────────┐
+│  TaskService.CreateTaskAsync()          │
+│  • Validate input with TaskValidator   │
+│  • Create TaskItem entity              │
+│  • Call repository                     │
+│  • Map entity to DTO                   │
+│  • Return DTO                          │
+└──────┬──────────────────────────────────┘
+       │ ITaskRepository
+       ▼
+┌────────────────────────────────────────┐
+│  TaskRepository.CreateAsync()           │
+│  • Call _context.Tasks.Add()           │
+│  • Call _context.SaveChangesAsync()   │
+│  • Entity Framework handles persistence│
+└──────┬──────────────────────────────────┘
+       │
+       ▼
+┌────────────────────────────────────────┐
+│  Database (In-Memory or SQL Server)     │
+│  INSERT INTO Tasks (Title, Desc, ...)  │
+│  Returns: Auto-generated Id            │
+└──────┬──────────────────────────────────┘
+       │
+       └─────────────────────────────────────┐
+                                     (flows back up)
+       ┌───────────────────────────────────┐
+       └────────► TaskDto (with Id)        │
+                  ↓                         <
+              Service Returns              <
+                  ↓
+              Controller Returns (201 Created)
+                  ↓
+              Client Receives Response
+
+═════════════════════════════════════════════════════════════════════════════════
+
+GET ALL REQUESTS:
+
+┌──────────────┐
+│   Client     │ GET /api/tasks
+└──────┬───────┘
+       │
+       ▼
+┌────────────────────────────────┐
+│  TasksController.GetAllTasks()  │
+└──────┬────────────────────────┬─┘
+       │                        │
+       ▼                        ▼
+┌──────────────────────────────┐
+│  ITaskService.GetAllTasksAsync()
+│  ↓
+│  ITaskRepository.GetAllAsync()
+│  ↓
+│  Entity Framework Core
+│  • SELECT * FROM Tasks ORDER BY CreatedAt DESC
+│  ↓
+│  Returns: IEnumerable<TaskItem>
+│  ↓
+│  Service maps: TaskItem → TaskDto
+│  ↓
+│  Controller: return Ok(taskDtos)
+└──────┬─────────────────────────┘
+       │
+       ▼
+┌──────────────────────────┐
+│  HTTP 200 OK            │
+│  Body: [TaskDto, ...]   │
+└──────┬──────────────────┘
+       │
+       ▼
+    Client
+
+=================================================================================
+BEST PRACTICES DEMONSTRATED
+=================================================================================
+
+✓ SEPARATION OF CONCERNS
+  Each layer has one responsibility:
+  • Domain: Business rules
+  • Application: Orchestration & validation
+  • Infrastructure: Data access
+  • Presentation: HTTP handling
+  Result: Easy to modify one layer without affecting others
+
+✓ DEPENDENCY INVERSION
+  Depend on abstractions (interfaces), not concretions
+  Example: Service depends on ITaskRepository, not TaskRepository
+  Result: Easy to swap implementations, testable
+
+✓ DRY (Don't Repeat Yourself)
+  Constants defined once: AppConstants.cs
+  Validation logic centralized: ValidationHelper, TaskValidator
+  Mapping logic in one place: MapToDto()
+  Result: Changes propagate everywhere automatically
+
+✓ SINGLE RESPONSIBILITY PRINCIPLE
+  Each class has one reason to change:
+  • TaskService: task operations logic
+  • TaskValidator: task validation rules
+  • TaskRepository: data access
+  • TasksController: HTTP handling
+  Result: Easy to test, understand, and maintain
+
+✓ OPEN/CLOSED PRINCIPLE
+  Open for extension, closed for modification
+  Example: Add new entity type
+    • Create Entity, Enum, Interface
+    • Create Service, Validator, Repository
+    • Create Controller
+    • Existing code unchanged
+  Result: Minimal risk when extending
+
+✓ ASYNC ALL THE WAY
+  All I/O operations are asynchronous
+  Repository methods: async Task<T>
+  Service methods: async Task<T>
+  Controller actions: async Task<IActionResult>
+  Result: Better scalability and resource utilization
+
+✓ ERROR HANDLING
+  Custom exceptions are specific:
+  • ValidationException: validation failures → 400
+  • NotFoundException: resource missing → 404
+  Controllers map exceptions to HTTP statuses
+  Result: Meaningful error responses
+
+✓ VALIDATION LAYERING
+  Input validated at API boundary (ModelState)
+  Business rules validated in service (validators)
+  Entity enforces constraints (constructors, methods)
+  Result: Multiple checkpoints for data integrity
+
+✓ TESTABILITY
+  Unit tests mock dependencies
+  Integration tests use real components (in-memory DB)
+  Test coverage for:
+    • Business logic (service tests)
+    • Data access (repository with mock DbContext)
+    • HTTP endpoints (controller integration tests)
+  Result: High confidence in code quality
+
+✓ DOCUMENTATION
+  XML comments on every class/method
+  Example:
+    /// <summary>
+    /// Create a new task
+    /// </summary>
+    public async Task<TaskDto> CreateTaskAsync(...)
+  Swagger generates API documentation automatically
+  Result: Self-documenting code
+
+=================================================================================
+POTENTIAL IMPROVEMENTS & RECOMMENDATIONS
+=================================================================================
+
+1. ✓ IMPLEMENT PAGING FOR GetAll() METHODS
+   Current: Returns all tasks at once
+   Risk: Performance issues with large datasets
+   
+   Solution:
+     public async Task<PagedResult<TaskDto>> GetAllTasksAsync(
+       int pageNumber = 1, int pageSize = 10)
+     
+   Benefit: Better performance with large datasets
+
+2. ✓ USE FluentValidation INSTEAD OF CUSTOM VALIDATOR
+   Current: Custom ValidationResult object
+   Better: FluentValidation NuGet package
+   
+   Example:
+     RuleFor(x => x.Title)
+       .NotEmpty()
+       .Length(3, 200);
+   
+   Benefit: More powerful, consistent validation library
+
+3. ✓ IMPLEMENT AUTOMAPPER FOR ENTITY-DTO MAPPING
+   Current: Manual MapToDto() method
+   Better: AutoMapper NuGet package
+   
+   Configuration:
+     CreateMap<TaskItem, TaskDto>();
+   
+   Benefit: Less boilerplate, easier to maintain
+
+4. ✓ USE VIEW MODELS FOR WEB CONTROLLERS
+   Current: TaskController uses DTOs directly
+   Better: Create separate ViewModels
+   
+   Example:
+     TaskListViewModel: IEnumerable<TaskDto>
+     TaskFormViewModel: CreateTaskDto + errors
+   
+   Benefit: Clean separation between data and presentation
+
+5. ✓ IMPLEMENT LOGGING
+   Current: No logging
+   Better: Serilog or Microsoft.Extensions.Logging
+   
+   Example:
+     _logger.LogInformation("Task created: {TaskId}", taskItem.Id);
+     _logger.LogError("Database error: {Error}", ex.Message);
+   
+   Benefit: Troubleshoot issues, monitor application
+
+6. ✓ IMPLEMENT SOFT DELETES
+   Current: Hard delete removes data
+   Better: Add IsDeleted flag, only logical delete
+   
+   Schema:
+     IsDeleted: bool = false
+   
+   Queries: Add WHERE IsDeleted = false
+   Benefit: Data recovery, audit trail
+
+7. ✓ USE MEDIATOR PATTERN (MediatR)
+   Current: Services directly injected
+   Better: CQRS with MediatR library
+   
+   Command:
+     public class CreateTaskCommand : IRequest<TaskDto>
+   
+   Handler:
+     public class CreateTaskCommandHandler
+   
+   Usage:
+     var result = await _mediator.Send(new CreateTaskCommand(...));
+   
+   Benefit: Better organize complex logic, easier testing
+
+8. ✓ IMPLEMENT CACHING
+   Current: Every request hits database
+   Better: Cache GetAllTasks() result
+   
+   Implementation:
+     [OutputCache(Duration = 60)]
+     public async Task<IActionResult> GetAllTasks()
+   
+   Benefit: Better performance, reduced database load
+
+9. ✓ IMPLEMENT AUTHENTICATION/AUTHORIZATION
+   Current: No security
+   Better: Add JWT authentication, role-based authorization
+   
+   Attributes:
+     [Authorize]
+     [Authorize(Roles = "Admin")]
+   
+   Benefit: Secure API endpoints
+
+10. ✓ USE SPECIFICATION PATTERN FOR COMPLEX QUERIES
+    Current: GetCompleted() only filters by IsCompleted
+    Better: Specification pattern for reusable complex filters
+    
+    Example:
+      new CompletedTasksSpecification()
+      new TasksCreatedAfterSpecification(date)
+    
+    Benefit: Centralize complex query logic
+
+11. ✓ IMPLEMENT REPOSITORY GENERIC METHODS
+    Current: Custom methods per entity type
+    Better: Generic<T> repository with CRUD operations
+    
+    BaseRepository<T>:
+      T GetById(id)
+      List<T> GetAll()
+      void Add(T entity)
+      void Update(T entity)
+      void Delete(T entity)
+    
+    Benefit: Reduce code duplication across repositories
+
+12. ✓ IMPLEMENT UNIT OF WORK PATTERN
+    Current: Direct repository calls
+    Better: Unit of Work manages multiple repositories
+    
+    Usage:
+      _unitOfWork.Tasks.Add(task);
+      _unitOfWork.SaveChangesAsync();
+    
+    Benefit: Atomic operations across multiple entities
+
+13. ✓ ADD API VERSIONING
+    Current: No versioning
+    Better: URL-based versioning
+    
+    Routes:
+      /api/v1/tasks
+      /api/v2/tasks (with breaking changes)
+    
+    Benefit: Support multiple API versions
+
+14. ✓ IMPLEMENT GLOBAL EXCEPTION HANDLING MIDDLEWARE
+    Current: try-catch in each controller
+    Better: Custom middleware layer
+    
+    Middleware:
+      app.UseExceptionHandler() + custom handler
+    
+    Benefit: Consistent error responses across all endpoints
+
+15. ✓ ADD INTEGRATION WITH EXTERNAL SYSTEMS
+    Current: Standalone application
+    Better: Message queues, event publishing
+    
+    Example:
+      TaskCreatedEvent → Published to queue → Other systems consume
+    
+    Benefit: Loose coupling between services
+
+16. ✓ IMPLEMENT DATABASE MIGRATIONS
+    Current: In-memory database
+    Better: Entity Framework Migrations for SQL Server
+    
+    Command:
+      dotnet ef migrations add InitialCreate
+      dotnet ef database update
+    
+    Benefit: Version control for database schema
+
+17. ✓ USE DEPENDENCY INJECTION FOR VALIDATORS
+    Current: TaskValidator created in Program.cs
+    Better: ValidationService with registered validators
+    
+    Benefit: More flexible validation composition
+
+18. ✓ IMPLEMENT HEALTH CHECKS
+    Current: No health endpoint
+    Better: /health endpoint
+    
+    Returns:
+      { "status": "healthy", "timestamp": "..." }
+    
+    Benefit: Monitor application status
+
+19. ✓ ADD REQUEST/RESPONSE LOGGING MIDDLEWARE
+    Current: No request logging
+    Better: Middleware logs all requests/responses
+    
+    Benefit: Audit trail, debugging
+
+20. ✓ USE CANCELLATION TOKENS FOR OPERATIONS
+    Current: No cancellation support
+    Better: CancellationToken parameters
+    
+    Example:
+      public async Task<TaskDto> GetTaskByIdAsync(int id, 
+        CancellationToken cancellationToken)
+    
+    Benefit: Clean shutdown, resource management
+
+=================================================================================
+SCALABILITY & PERFORMANCE CONSIDERATIONS
+=================================================================================
+
+CURRENT ARCHITECTURE SCALES BY:
+
+1. STATELESS DESIGN
+   ✓ No server-side state in controllers
+   ✓ Can run multiple instances behind load balancer
+   ✓ Easy horizontal scaling
+
+2. DEPENDENCY INJECTION SCOPING
+   ✓ Scoped services created per request
+   ✓ Efficient resource management
+   ✓ DbContext lifecycle tied to request
+
+3. ASYNC/AWAIT THROUGHOUT
+   ✓ Non-blocking I/O
+   ✓ Thread pool threads available for other requests
+   ✓ Better thread utilization
+
+4. ENTITY FRAMEWORK QUERY OPTIMIZATION
+   ✓ Index on IsCompleted column
+   ✓ No unnecessary joins (lazy loading disabled by default)
+   ✓ Can add eager loading with Include() when needed
+
+RECOMMENDATIONS FOR SCALE:
+
+1. Add caching layer (Redis)
+   • Cache GetAllTasks() results
+   • Invalidate on create/update/delete
+   • Significant performance boost
+
+2. Implement pagination
+   • Limit result sets
+   • GetAllTasks(pageNumber=1, pageSize=10)
+   • Reduce bandwidth and memory usage
+
+3. Use Read/Write database splitting
+   • Read-only replicas for queries
+   • Write database for inserts/updates
+   • Better performance under high load
+
+4. Implement event sourcing
+   • Store state changes as events
+   • Rebuild state from events when needed
+   • Audit trail built-in
+
+5. Add background job processing
+   • Long-running operations in background
+   • Return 202 Accepted immediately
+   • Process asynchronously with Hangfire/Quartz
+
+=================================================================================
+TESTING STRATEGY SUMMARY
+=================================================================================
+
+UNIT TESTS (Fast, Isolated)
+├── Test: TaskService
+│   ├── CreateTaskAsync_Valid
+│   ├── CreateTaskAsync_Invalid
+│   ├── UpdateTaskAsync_NotFound
+│   └── ...
+│
+├── Test: TaskValidator
+│   ├── ValidateCreate_Valid
+│   ├── ValidateCreate_TitleTooShort
+│   └── ...
+│
+└── Benefits: Fast, no database, focused
+
+INTEGRATION TESTS (Slower, Real Components)
+├── Test: TasksController
+│   ├── GetAllTasks_Returns200
+│   ├── CreateTask_Valid_Returns201
+│   ├── CreateTask_Invalid_Returns400
+│   └── ...
+│
+└── Benefits: Test real flow, catch integration issues
+
+TEST COVERAGE PYRAMID:
+        △
+       / \
+      /   \  E2E Tests (few)
+     /─────\
+    /       \
+   /         \ Integration Tests (some)
+  /───────────\
+ /             \
+/_______________\ Unit Tests (many)
+
+KEY METRICS:
+• Aim for 80%+ code coverage
+• Critical paths have integration tests
+• All public methods have unit tests
+• Edge cases covered in unit tests
+
+=================================================================================
+SUMMARY & KEY TAKEAWAYS
+=================================================================================
+
+ARCHITECTURE PATTERN:
+✓ Clean Architecture (6-layer)
+✓ Dependency Inversion (dependencies flow inward)
+✓ Each layer independent and testable
+
+DESIGN PATTERNS USED:
+✓ Repository Pattern (abstract data access)
+✓ Service Layer (business logic)
+✓ DTO Pattern (API contracts)
+✓ Validator Pattern (validation logic)
+✓ Exception-Based Error Handling (domain exceptions → HTTP)
+✓ Dependency Injection (loose coupling)
+
+KEY STRENGTHS:
+✓ Maintainability: Each layer has clear responsibility
+✓ Testability: Easy to mock dependencies
+✓ Flexibility: Swap implementations easily
+✓ Scalability: Stateless design allows horizontal scaling
+✓ Reusability: Service layer used by both API and Web
+
+FILES SUMMARY TABLE:
+
+┌──────────────────┬──────────────┬─────────────────────────────┐
+│ File             │ Layer        │ Responsibility              │
+├──────────────────┼──────────────┼─────────────────────────────┤
+│ TaskItem         │ Domain       │ Core entity, business logic │
+│ TaskStatus       │ Domain       │ Enumeration of states       │
+│ ITaskRepository  │ Domain/Core  │ Data access contract        │
+│ AppConstants     │ Shared       │ App-wide constants          │
+│ Exceptions       │ Shared       │ Custom exception types      │
+│ ValidationHelper │ Shared       │ Validation utilities        │
+│ TaskDto          │ Application  │ API data contract           │
+│ ITaskService     │ Application  │ Business operation contract │
+│ TaskService      │ Application  │ Business logic orchestration│
+│ TaskValidator    │ Application  │ Input validation            │
+│ TaskRepository   │ Infrastructure │ Database access           │
+│ DbContext        │ Infrastructure │ EF Core configuration      │
+│ Program.cs       │ Infrastructure │ DI & startup config       │
+│ TasksController  │ Presentation │ REST API endpoints          │
+│ TaskController   │ Presentation │ MVC Web controller          │
+│ Unit Tests       │ Testing      │ Isolated logic testing      │
+│ Integration Tests│ Testing      │ End-to-end testing         │
+└──────────────────┴──────────────┴─────────────────────────────┘
+
+LEARNING OUTCOMES:
+After studying this project, you'll understand:
+✓ How clean architecture promotes maintainability
+✓ How dependency injection enables loose coupling
+✓ How to write testable code
+✓ How REST APIs are structured
+✓ How Entity Framework Core maps objects to database
+✓ How design patterns solve real problems
+✓ How to organize code for scalability
+✓ Best practices for enterprise applications
+
+=================================================================================
+END OF ANALYSIS
+=================================================================================

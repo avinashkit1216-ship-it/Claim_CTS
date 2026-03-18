@@ -6,7 +6,7 @@ using TaskManagement.Domain.Interfaces;
 using TaskManagement.Infrastructure.Data.DbContext;
 using TaskManagement.Infrastructure.Repositories;
 
-var builder = WebApplicationBuilder.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 // ===================================================================
 // DEPENDENCY INJECTION CONFIGURATION FOR WEB LAYER

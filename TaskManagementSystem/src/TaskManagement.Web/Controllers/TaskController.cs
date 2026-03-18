@@ -68,7 +68,7 @@ public class TaskController : Controller
     /// </summary>
     public IActionResult Create()
     {
-        return View();
+        return View(new TaskFormViewModel());
     }
 
     /// <summary>
