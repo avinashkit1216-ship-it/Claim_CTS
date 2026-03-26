@@ -30,8 +30,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2xhaW0vQWRkLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/Views/Claim/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2xhaW0vQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/Views/Claim/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2xhaW0vRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/Views/Claim/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2xhaW0vSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/Views/Claim/List.cshtml]

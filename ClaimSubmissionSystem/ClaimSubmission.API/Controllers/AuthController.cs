@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ClaimSubmission.API.DTOs;
+using ClaimSubmission.API.Services;
+using ClaimSubmission.API.Data;
 
 namespace ClaimSubmission.API.Controllers
 {
@@ -10,10 +12,20 @@ namespace ClaimSubmission.API.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
+        private readonly IAuthRepository _authRepository;
+        private readonly IJwtTokenService _tokenService;
+        private readonly IPasswordHashService _passwordHashService;
         private readonly ILogger<AuthController> _logger;
 
-        public AuthController(ILogger<AuthController> logger)
+        public AuthController(
+            IAuthRepository authRepository,
+            IJwtTokenService tokenService,
+            IPasswordHashService passwordHashService,
+            ILogger<AuthController> logger)
         {
+            _authRepository = authRepository;
+            _tokenService = tokenService;
+            _passwordHashService = passwordHashService;
             _logger = logger;
         }
 
@@ -26,7 +38,7 @@ namespace ClaimSubmission.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public IActionResult Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             try
             {
@@ -36,27 +48,38 @@ namespace ClaimSubmission.API.Controllers
                     return BadRequest(new { error = "Username and password are required" });
                 }
 
-                // TODO: Implement actual user authentication with database
-                // This is a placeholder implementation for demonstration
-                if (request.Username == "admin" && request.Password == "admin123")
-                {
-                    var response = new
-                    {
-                        data = new LoginResponse
-                        {
-                            UserId = 1,
-                            Username = request.Username,
-                            FullName = "Administrator",
-                            Token = GenerateToken(request.Username)
-                        }
-                    };
+                // Hash the password for comparison
+                var passwordHash = _passwordHashService.HashPassword(request.Password);
 
-                    _logger.LogInformation($"User '{request.Username}' logged in successfully");
-                    return Ok(response);
+                // Validate credentials against database
+                var user = await _authRepository.ValidateCredentialsAsync(request.Username, request.Password);
+                
+                if (user == null)
+                {
+                    _logger.LogWarning($"Failed login attempt for user '{request.Username}'");
+                    return Unauthorized(new { error = "Invalid username or password" });
                 }
 
-                _logger.LogWarning($"Failed login attempt for user '{request.Username}'");
-                return Unauthorized(new { error = "Invalid username or password" });
+                // Update last login
+                await _authRepository.UpdateLastLoginAsync(user.UserId);
+
+                // Generate JWT token
+                var token = _tokenService.GenerateToken(user);
+
+                var response = new
+                {
+                    data = new LoginResponse
+                    {
+                        UserId = user.UserId,
+                        Username = user.Username,
+                        FullName = user.FullName,
+                        Email = user.Email,
+                        Token = token
+                    }
+                };
+
+                _logger.LogInformation($"User '{request.Username}' logged in successfully");
+                return Ok(response);
             }
             catch (Exception ex)
             {
@@ -65,14 +88,6 @@ namespace ClaimSubmission.API.Controllers
                     new { error = "An error occurred during login" });
             }
         }
-
-        /// <summary>
-        /// Generate a simple JWT-like token (placeholder)
-        /// </summary>
-        private string GenerateToken(string username)
-        {
-            // TODO: Implement proper JWT token generation
-            return Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{username}:{DateTime.UtcNow.Ticks}"));
-        }
     }
 }
+

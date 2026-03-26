@@ -1,0 +1,218 @@
+@model ClaimsPaginatedListViewModel
+
+@{
+    ViewData["Title"] = "Claims";
+}
+
+<div class="container-fluid mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="mb-0">Claims Management</h2>
+            <p class="text-muted">Total Records: @Model?.TotalRecords ?? 0</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Create", "Claim")" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle"></i> Add New Claim
+            </a>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="Index" asp-controller="Claim" class="row g-3">
+                <div class="col-md-4">
+                    <label for="searchTerm" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="searchTerm" name="searchTerm" 
+                           placeholder="Claim #, Patient, Provider..." value="@Model?.SearchTerm" />
+                </div>
+
+                <div class="col-md-2">
+                    <label for="claimStatus" class="form-label">Status</label>
+                    <select class="form-select" id="claimStatus" name="claimStatus">
+                        <option value="">-- All --</option>
+                        <option value="Pending" selected="@(Model?.ClaimStatus == "Pending")">Pending</option>
+                        <option value="Approved" selected="@(Model?.ClaimStatus == "Approved")">Approved</option>
+                        <option value="Rejected" selected="@(Model?.ClaimStatus == "Rejected")">Rejected</option>
+                        <option value="Processing" selected="@(Model?.ClaimStatus == "Processing")">Processing</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label for="sortBy" class="form-label">Sort By</label>
+                    <select class="form-select" id="sortBy" name="sortBy">
+                        <option value="CreatedDate" selected="@(Model?.SortBy == "CreatedDate")">Date Created</option>
+                        <option value="ClaimNumber" selected="@(Model?.SortBy == "ClaimNumber")">Claim #</option>
+                        <option value="PatientName" selected="@(Model?.SortBy == "PatientName")">Patient</option>
+                        <option value="ClaimAmount" selected="@(Model?.SortBy == "ClaimAmount")">Amount</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label for="sortDirection" class="form-label">Order</label>
+                    <select class="form-select" id="sortDirection" name="sortDirection">
+                        <option value="DESC" selected="@(Model?.SortDirection == "DESC")">Descending</option>
+                        <option value="ASC" selected="@(Model?.SortDirection == "ASC")">Ascending</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Claims Table -->
+    <div class="card">
+        <div class="table-responsive">
+            @if (Model?.Claims != null && Model.Claims.Any())
+            {
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Claim #</th>
+                            <th>Patient Name</th>
+                            <th>Provider Name</th>
+                            <th>Date of Service</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var claim in Model.Claims)
+                        {
+                            <tr>
+                                <td><strong>@claim.ClaimNumber</strong></td>
+                                <td>@claim.PatientName</td>
+                                <td>@claim.ProviderName</td>
+                                <td>@claim.DateOfService.ToString("MM/dd/yyyy")</td>
+                                <td>$@claim.ClaimAmount.ToString("F2")</td>
+                                <td>
+                                    @{
+                                        var statusClass = claim.ClaimStatus switch
+                                        {
+                                            "Approved" => "badge bg-success",
+                                            "Rejected" => "badge bg-danger",
+                                            "Pending" => "badge bg-warning",
+                                            "Processing" => "badge bg-info",
+                                            _ => "badge bg-secondary"
+                                        };
+                                    }
+                                    <span class="@statusClass">@claim.ClaimStatus</span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="@Url.Action("Edit", "Claim", new { id = claim.ClaimId })" class="btn btn-sm btn-outline-primary">
+                                        Edit
+                                    </a>
+                                    <form method="post" asp-action="Delete" asp-controller="Claim" asp-route-id="@claim.ClaimId" 
+                                          style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this claim?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-info m-3">No claims found. <a href="@Url.Action("Create", "Claim")">Create a new claim</a></div>
+            }
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    @if (Model?.TotalPages > 1)
+    {
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                @{
+                    var pageLinks = "";
+                    var currentPage = Model?.PageNumber ?? 1;
+                    var totalPages = Model?.TotalPages ?? 1;
+
+                    // Previous
+                    if (currentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Index", new { pageNumber = currentPage - 1, searchTerm = Model?.SearchTerm, claimStatus = Model?.ClaimStatus, sortBy = Model?.SortBy, sortDirection = Model?.SortDirection })">
+                                Previous
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link">Previous</span>
+                        </li>
+                    }
+
+                    // Page numbers
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        if (i == currentPage)
+                        {
+                            <li class="page-item active">
+                                <span class="page-link">@i</span>
+                            </li>
+                        }
+                        else if (i >= currentPage - 2 && i <= currentPage + 2)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { pageNumber = i, searchTerm = Model?.SearchTerm, claimStatus = Model?.ClaimStatus, sortBy = Model?.SortBy, sortDirection = Model?.SortDirection })">
+                                    @i
+                                </a>
+                            </li>
+                        }
+                    }
+
+                    // Next
+                    if (currentPage < totalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Index", new { pageNumber = currentPage + 1, searchTerm = Model?.SearchTerm, claimStatus = Model?.ClaimStatus, sortBy = Model?.SortBy, sortDirection = Model?.SortDirection })">
+                                Next
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link">Next</span>
+                        </li>
+                    }
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .badge {
+        padding: 5px 10px;
+        font-weight: 500;
+    }
+</style>

@@ -7,25 +7,42 @@ using ClaimSubmission.Web.Services;
 
 namespace ClaimSubmission.Web.Controllers
 {
-    
+    /// <summary>
+    /// Authentication controller for user login/logout
+    /// </summary>
     public class AuthenticationController : Controller
     {
         private readonly IAuthenticationService _authService;
+        private readonly ILogger<AuthenticationController> _logger;
 
-        public AuthenticationController(IAuthenticationService authService)
+        public AuthenticationController(IAuthenticationService authService, ILogger<AuthenticationController> logger)
         {
             _authService = authService;
+            _logger = logger;
         }
 
+        /// <summary>
+        /// Display login page
+        /// </summary>
         [AllowAnonymous]
-        public IActionResult Login() {
+        public IActionResult Login(string? returnUrl = null)
+        {
+            if (HttpContext.Session.GetString("IsAuthenticated") == "true")
+            {
+                return RedirectToAction("Index", "Claim");
+            }
+
+            ViewData["ReturnUrl"] = returnUrl;
             return View(new LoginViewModel());
         }
 
+        /// <summary>
+        /// Handle login submission
+        /// </summary>
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
             if (!ModelState.IsValid)
             {
@@ -34,48 +51,67 @@ namespace ClaimSubmission.Web.Controllers
 
             try
             {
-                UserViewModel user = await _authService.LoginAsync(model);
+                UserViewModel? user = await _authService.LoginAsync(model);
 
                 if (user != null)
                 {
                     // Store user information in session
                     HttpContext.Session.SetString("UserId", user.UserId.ToString());
-                    HttpContext.Session.SetString("UserName", user.UserName ?? string.Empty);
+                    HttpContext.Session.SetString("Username", user.Username ?? string.Empty);
                     HttpContext.Session.SetString("FullName", user.FullName ?? string.Empty);
+                    HttpContext.Session.SetString("Email", user.Email ?? string.Empty);
                     HttpContext.Session.SetString("UserToken", user.Token ?? string.Empty);
                     HttpContext.Session.SetString("IsAuthenticated", "true");
 
-                    // Note: For persistent authentication, consider using cookie authentication middleware
-                    // with claims-based identity instead of sessions
+                    _logger.LogInformation($"User '{model.Username}' logged in successfully");
 
-                    return RedirectToAction("List", "Claim");
+                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    {
+                        return Redirect(returnUrl);
+                    }
+
+                    return RedirectToAction("Index", "Claim");
                 }
                 else
                 {
-                    ViewBag.Error = "Invalid username or password";
-                    return View(model);
+                    ModelState.AddModelError(string.Empty, "Invalid username or password");
+                    _logger.LogWarning($"Failed login attempt for user '{model.Username}'");
                 }
             }
             catch (UnauthorizedAccessException)
             {
-                ViewBag.Error = "Invalid username or password";
-                return View(model);
+                ModelState.AddModelError(string.Empty, "Invalid username or password");
             }
             catch (Exception ex)
             {
-                ViewBag.Error = $"Login error: {ex.Message}";
-                return View(model);
+                _logger.LogError(ex, "Error during login");
+                ModelState.AddModelError(string.Empty, "An error occurred during login. Please try again.");
             }
+
+            return View(model);
         }
 
         /// <summary>
-        /// GET: Authentication/Logout
-        /// Clear user session and log out
+        /// Logout user
         /// </summary>
-        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Logout()
         {
-            HttpContext.Session.Clear();
+            try
+            {
+                var username = HttpContext.Session.GetString("Username");
+                
+                // Clear session
+                HttpContext.Session.Clear();
+                
+                _logger.LogInformation($"User '{username}' logged out");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during logout");
+            }
+
             return RedirectToAction("Login");
         }
     }

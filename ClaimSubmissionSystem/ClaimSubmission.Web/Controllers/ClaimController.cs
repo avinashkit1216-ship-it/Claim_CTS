@@ -1,62 +1,90 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Configuration;
 using ClaimSubmission.Web.Models;
 using ClaimSubmission.Web.Services;
 
 namespace ClaimSubmission.Web.Controllers
 {
+    /// <summary>
+    /// Claims controller for managing claims
+    /// User must be authenticated to access these endpoints
+    /// </summary>
     [Authorize]
     public class ClaimController : Controller
     {
         private readonly IClaimApiService _claimApiService;
+        private readonly ILogger<ClaimController> _logger;
 
-        public ClaimController(IClaimApiService claimApiService)
+        public ClaimController(IClaimApiService claimApiService, ILogger<ClaimController> logger)
         {
             _claimApiService = claimApiService;
+            _logger = logger;
         }
 
-        // Display List of Claims
-        public async Task<IActionResult> List(int pageNumber = 1, int pageSize = 10)
+        /// <summary>
+        /// Display paginated list of claims with filtering
+        /// </summary>
+        public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 20, 
+            string? searchTerm = null, string? claimStatus = null, 
+            string? sortBy = "CreatedDate", string? sortDirection = "DESC")
         {
             try
             {
+                if (!IsUserAuthenticated())
+                    return RedirectToAction("Login", "Authentication");
+
                 string token = GetUserToken();
-                List<ClaimViewListModel> claims = await _claimApiService.GetAllClaimsAsync(token, pageNumber, pageSize);
+                
+                var claims = await _claimApiService.GetClaimsAsync(token, pageNumber, pageSize, 
+                    searchTerm, claimStatus, sortBy, sortDirection);
+
+                if (claims == null)
+                {
+                    ViewBag.Error = "Unable to load claims";
+                    return View(new ClaimsPaginatedListViewModel { Claims = new List<ClaimViewListModel>() });
+                }
+
                 return View(claims);
             }
-            catch (Exception e)
+            catch (UnauthorizedAccessException)
             {
-                ViewBag.Error = $"Error loading claims: {e.Message}";
-                return View(new List<ClaimViewListModel>());
+                _logger.LogWarning("Unauthorized access attempt");
+                return RedirectToAction("Login", "Authentication");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading claims");
+                ViewBag.Error = $"Error loading claims: {ex.Message}";
+                return View(new ClaimsPaginatedListViewModel { Claims = new List<ClaimViewListModel>() });
             }
         }
 
-        // GET: Claim/Add
-        public IActionResult Add()
+        /// <summary>
+        /// Display create claim page
+        /// </summary>
+        [HttpGet]
+        public IActionResult Create()
         {
-            return View(new AddClaimViewModel());
+            if (!IsUserAuthenticated())
+                return RedirectToAction("Login", "Authentication");
+
+            return View(new CreateClaimViewModel());
         }
 
-        // POST: Claim/Add
+        /// <summary>
+        /// Handle claim creation
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Add(AddClaimViewModel model)
+        public async Task<IActionResult> Create(CreateClaimViewModel model)
         {
+            if (!IsUserAuthenticated())
+                return RedirectToAction("Login", "Authentication");
+
             if (!ModelState.IsValid)
             {
-                var errors = new List<string>();
-                foreach (var modelState in ModelState.Values)
-                {
-                    foreach (var err in modelState.Errors)
-                    {
-                        errors.Add(err.ErrorMessage);
-                    }
-                }
-                ViewBag.ValidationErrors = errors;
                 return View(model);
             }
 
@@ -67,110 +95,140 @@ namespace ClaimSubmission.Web.Controllers
 
                 if (claimId > 0)
                 {
-                    TempData["Message"] = "Claim added successfully";
-                    return RedirectToAction("List");
+                    _logger.LogInformation($"Claim created successfully - ID: {claimId}");
+                    TempData["SuccessMessage"] = "Claim created successfully";
+                    return RedirectToAction(nameof(Index));
                 }
                 else
                 {
-                    ViewBag.Error = "Failed to create claim";
-                    return View(model);
+                    ModelState.AddModelError(string.Empty, "Failed to create claim");
                 }
             }
             catch (Exception ex)
             {
-                ViewBag.Error = $"Error creating claim: {ex.Message}";
-                return View(model);
+                _logger.LogError(ex, "Error creating claim");
+                ModelState.AddModelError(string.Empty, $"Error creating claim: {ex.Message}");
             }
+
+            return View(model);
         }
 
-        // GET: Claim/Edit
+        /// <summary>
+        /// Display edit claim page
+        /// </summary>
+        [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
+            if (!IsUserAuthenticated())
+                return RedirectToAction("Login", "Authentication");
+
+            if (id <= 0)
+                return NotFound();
+
             try
             {
                 string token = GetUserToken();
-                ClaimViewListModel claim = await _claimApiService.GetClaimByIdAsync(token, id);
-                if (claim == null)
-                {
-                    return NotFound();
-                }
+                var claim = await _claimApiService.GetClaimByIdAsync(token, id);
 
-                var editmodel = new EditClaimViewModel
-                {
-                    ClaimId = claim.ClaimId,
-                    ClaimAmount = claim.ClaimAmount,
-                    ClaimNumber = claim.ClaimNumber,
-                    ClaimStatus = claim.ClaimStatus,
-                    DateOfService = claim.DateOfService,
-                    PatientName = claim.PatientName,
-                    ProviderName = claim.ProviderName,
-                };
-                return View(editmodel);
+                if (claim == null)
+                    return NotFound();
+
+                return View(claim);
             }
-            catch (Exception e)
+            catch (UnauthorizedAccessException)
             {
-                ViewBag.Error = $"Error loading claim: {e.Message}";
-                return RedirectToAction("List");
+                return RedirectToAction("Login", "Authentication");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error loading claim {id}");
+                return NotFound();
             }
         }
 
-        // POST: Claim/Edit
+        /// <summary>
+        /// Handle claim update
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, EditClaimViewModel model)
         {
+            if (!IsUserAuthenticated())
+                return RedirectToAction("Login", "Authentication");
+
+            if (id != model.ClaimId)
+                return BadRequest();
+
             if (!ModelState.IsValid)
             {
-                var errors = new List<string>();
-                foreach (var modelState in ModelState.Values)
-                {
-                    foreach (var error in modelState.Errors)
-                    {
-                        errors.Add(error.ErrorMessage);
-                    }
-                }
-                ViewBag.ValidationErrors = errors;
                 return View(model);
             }
 
             try
             {
-                model.ClaimId = id;
                 string token = GetUserToken();
                 await _claimApiService.UpdateClaimAsync(token, model);
 
-                TempData["Message"] = "Claim updated successfully";
-                return RedirectToAction("List");
+                _logger.LogInformation($"Claim updated successfully - ID: {id}");
+                TempData["SuccessMessage"] = "Claim updated successfully";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return RedirectToAction("Login", "Authentication");
             }
             catch (Exception ex)
             {
-                ViewBag.Error = $"Error updating claim: {ex.Message}";
+                _logger.LogError(ex, $"Error updating claim {id}");
+                ModelState.AddModelError(string.Empty, $"Error updating claim: {ex.Message}");
                 return View(model);
             }
         }
 
-        // POST: Claim/Delete
+        /// <summary>
+        /// Handle claim deletion
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
+            if (!IsUserAuthenticated())
+                return RedirectToAction("Login", "Authentication");
+
+            if (id <= 0)
+                return BadRequest();
+
             try
             {
                 string token = GetUserToken();
                 await _claimApiService.DeleteClaimAsync(token, id);
 
-                TempData["Message"] = "Claim deleted successfully";
-                return RedirectToAction("List");
+                _logger.LogInformation($"Claim deleted successfully - ID: {id}");
+                TempData["SuccessMessage"] = "Claim deleted successfully";
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return RedirectToAction("Login", "Authentication");
             }
             catch (Exception ex)
             {
-                ViewBag.Error = $"Error deleting claim: {ex.Message}";
-                return RedirectToAction("List");
+                _logger.LogError(ex, $"Error deleting claim {id}");
+                TempData["ErrorMessage"] = $"Error deleting claim: {ex.Message}";
             }
+
+            return RedirectToAction(nameof(Index));
         }
 
         /// <summary>
-        /// Helper method to get user token from session
+        /// Check if user is authenticated
+        /// </summary>
+        private bool IsUserAuthenticated()
+        {
+            return HttpContext.Session.GetString("IsAuthenticated") == "true";
+        }
+
+        /// <summary>
+        /// Get user authentication token from session
         /// </summary>
         private string GetUserToken()
         {

@@ -1,0 +1,135 @@
+@model CreateClaimViewModel
+
+@{
+    ViewData["Title"] = "Create Claim";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Create New Claim</h4>
+                </div>
+                <div class="card-body p-4">
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Please correct the following errors:</strong>
+                            @Html.ValidationSummary(false, "", new { @class = "mb-0" })
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form method="post" asp-action="Create" asp-controller="Claim" novalidate>
+                        @Html.AntiForgeryToken()
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="ClaimNumber" class="form-label fw-500">Claim Number <span class="text-danger">*</span></label>
+                                <input asp-for="ClaimNumber" class="form-control @(ViewData.ModelState.ContainsKey(nameof(CreateClaimViewModel.ClaimNumber)) && ViewData.ModelState[nameof(CreateClaimViewModel.ClaimNumber)]?.Errors.Count > 0 ? "is-invalid" : "")"
+                                       placeholder="Enter claim number" required />
+                                <div class="invalid-feedback d-block">
+                                    @Html.ValidationMessageFor(m => m.ClaimNumber)
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="DateOfService" class="form-label fw-500">Date of Service <span class="text-danger">*</span></label>
+                                <input asp-for="DateOfService" type="date" class="form-control @(ViewData.ModelState.ContainsKey(nameof(CreateClaimViewModel.DateOfService)) && ViewData.ModelState[nameof(CreateClaimViewModel.DateOfService)]?.Errors.Count > 0 ? "is-invalid" : "")"
+                                       required />
+                                <div class="invalid-feedback d-block">
+                                    @Html.ValidationMessageFor(m => m.DateOfService)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="PatientName" class="form-label fw-500">Patient Name <span class="text-danger">*</span></label>
+                                <input asp-for="PatientName" class="form-control @(ViewData.ModelState.ContainsKey(nameof(CreateClaimViewModel.PatientName)) && ViewData.ModelState[nameof(CreateClaimViewModel.PatientName)]?.Errors.Count > 0 ? "is-invalid" : "")"
+                                       placeholder="Enter patient name" required />
+                                <div class="invalid-feedback d-block">
+                                    @Html.ValidationMessageFor(m => m.PatientName)
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="ProviderName" class="form-label fw-500">Provider Name <span class="text-danger">*</span></label>
+                                <input asp-for="ProviderName" class="form-control @(ViewData.ModelState.ContainsKey(nameof(CreateClaimViewModel.ProviderName)) && ViewData.ModelState[nameof(CreateClaimViewModel.ProviderName)]?.Errors.Count > 0 ? "is-invalid" : "")"
+                                       placeholder="Enter provider name" required />
+                                <div class="invalid-feedback d-block">
+                                    @Html.ValidationMessageFor(m => m.ProviderName)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="ClaimAmount" class="form-label fw-500">Claim Amount <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input asp-for="ClaimAmount" type="number" step="0.01" min="0" class="form-control @(ViewData.ModelState.ContainsKey(nameof(CreateClaimViewModel.ClaimAmount)) && ViewData.ModelState[nameof(CreateClaimViewModel.ClaimAmount)]?.Errors.Count > 0 ? "is-invalid" : "")"
+                                           placeholder="0.00" required />
+                                    <div class="invalid-feedback d-block">
+                                        @Html.ValidationMessageFor(m => m.ClaimAmount)
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="ClaimStatus" class="form-label fw-500">Claim Status <span class="text-danger">*</span></label>
+                                <select asp-for="ClaimStatus" class="form-select @(ViewData.ModelState.ContainsKey(nameof(CreateClaimViewModel.ClaimStatus)) && ViewData.ModelState[nameof(CreateClaimViewModel.ClaimStatus)]?.Errors.Count > 0 ? "is-invalid" : "")"
+                                        required>
+                                    <option value="">-- Select Status --</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Processing">Processing</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+                                <div class="invalid-feedback d-block">
+                                    @Html.ValidationMessageFor(m => m.ClaimStatus)
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Create Claim
+                            </button>
+                            <a href="@Url.Action("Index", "Claim")" class="btn btn-secondary btn-lg">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<style>
+    .required-field::after {
+        content: " (Required)";
+        color: #dc3545;
+        font-size: 12px;
+    }
+
+    .form-label {
+        margin-bottom: 8px;
+    }
+
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+</style>

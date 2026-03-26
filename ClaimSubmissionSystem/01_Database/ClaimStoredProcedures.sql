@@ -200,4 +200,116 @@ BEGIN
 END
 GO
 
+-- Procedure: sp_Claim_GetAllWithFiltering
+-- Purpose: Retrieve claims with pagination, filtering, and sorting
+IF OBJECT_ID('sp_Claim_GetAllWithFiltering', 'P') IS NOT NULL
+    DROP PROCEDURE sp_Claim_GetAllWithFiltering;
+GO
+
+CREATE PROCEDURE sp_Claim_GetAllWithFiltering
+    @PageNumber INT = 1,
+    @PageSize INT = 20,
+    @SearchTerm NVARCHAR(100) = NULL,
+    @ClaimStatus NVARCHAR(50) = NULL,
+    @SortBy NVARCHAR(50) = 'CreatedDate',
+    @SortDirection NVARCHAR(4) = 'DESC'
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @SkipRows INT = (@PageNumber - 1) * @PageSize;
+    DECLARE @ValidSortBy NVARCHAR(50) = CASE 
+        WHEN @SortBy IN ('ClaimNumber', 'PatientName', 'ProviderName', 'DateOfService', 'ClaimAmount', 'ClaimStatus', 'CreatedDate')
+        THEN @SortBy
+        ELSE 'CreatedDate'
+    END;
+    DECLARE @ValidSortDirection NVARCHAR(4) = CASE 
+        WHEN @SortDirection IN ('ASC', 'DESC')
+        THEN @SortDirection
+        ELSE 'DESC'
+    END;
+
+    -- Build dynamic ORDER BY clause
+    DECLARE @OrderBy NVARCHAR(100) = @ValidSortBy + ' ' + @ValidSortDirection;
+
+    -- Main query with filtering
+    SELECT ClaimId,
+           ClaimNumber,
+           PatientName,
+           ProviderName,
+           DateOfService,
+           ClaimAmount,
+           ClaimStatus,
+           CreatedDate
+    FROM Claims
+    WHERE (
+        (@SearchTerm IS NULL) OR
+        (
+            ClaimNumber LIKE '%' + @SearchTerm + '%' OR
+            PatientName LIKE '%' + @SearchTerm + '%' OR
+            ProviderName LIKE '%' + @SearchTerm + '%'
+        )
+    )
+    AND (
+        (@ClaimStatus IS NULL) OR (ClaimStatus = @ClaimStatus)
+    )
+    ORDER BY CASE WHEN @ValidSortDirection = 'ASC' THEN 
+        CASE @ValidSortBy
+            WHEN 'ClaimNumber' THEN ClaimNumber
+            WHEN 'PatientName' THEN PatientName
+            WHEN 'ProviderName' THEN ProviderName
+            WHEN 'DateOfService' THEN CONVERT(NVARCHAR(100), DateOfService)
+            WHEN 'ClaimAmount' THEN CONVERT(NVARCHAR(100), ClaimAmount)
+            WHEN 'ClaimStatus' THEN ClaimStatus
+            ELSE CONVERT(NVARCHAR(100), CreatedDate)
+        END
+    END ASC,
+    CASE WHEN @ValidSortDirection = 'DESC' THEN 
+        CASE @ValidSortBy
+            WHEN 'ClaimNumber' THEN ClaimNumber
+            WHEN 'PatientName' THEN PatientName
+            WHEN 'ProviderName' THEN ProviderName
+            WHEN 'DateOfService' THEN CONVERT(NVARCHAR(100), DateOfService)
+            WHEN 'ClaimAmount' THEN CONVERT(NVARCHAR(100), ClaimAmount)
+            WHEN 'ClaimStatus' THEN ClaimStatus
+            ELSE CONVERT(NVARCHAR(100), CreatedDate)
+        END
+    END DESC
+    OFFSET @SkipRows ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+END
+GO
+
+-- Procedure: sp_Claim_GetCountWithFiltering
+-- Purpose: Get total count of claims matching filter criteria
+IF OBJECT_ID('sp_Claim_GetCountWithFiltering', 'P') IS NOT NULL
+    DROP PROCEDURE sp_Claim_GetCountWithFiltering;
+GO
+
+CREATE PROCEDURE sp_Claim_GetCountWithFiltering
+    @SearchTerm NVARCHAR(100) = NULL,
+    @ClaimStatus NVARCHAR(50) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT COUNT(*) AS TotalClaims
+    FROM Claims
+    WHERE (
+        (@SearchTerm IS NULL) OR
+        (
+            ClaimNumber LIKE '%' + @SearchTerm + '%' OR
+            PatientName LIKE '%' + @SearchTerm + '%' OR
+            ProviderName LIKE '%' + @SearchTerm + '%'
+        )
+    )
+    AND (
+        (@ClaimStatus IS NULL) OR (ClaimStatus = @ClaimStatus)
+    );
+END
+GO
+
+PRINT 'Claims stored procedures created successfully.';
+GO
+
 PRINT 'Claim management stored procedures created successfully.';

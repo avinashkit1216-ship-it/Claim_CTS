@@ -1,8 +1,23 @@
 {
   "version": 2,
-  "dgSpecHash": "57WbGiJKkC0=",
+  "dgSpecHash": "rGwluO0jexg=",
   "success": true,
   "projectFilePath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/ClaimSubmission.Web.csproj",
-  "expectedPackageFiles": [],
-  "logs": []
+  "expectedPackageFiles": [
+    "/home/codespace/.nuget/packages/system.net.http.json/8.0.0/system.net.http.json.8.0.0.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1510",
+      "level": "Warning",
+      "message": "PackageReference System.Net.Http.Json will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.",
+      "projectPath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/ClaimSubmission.Web.csproj",
+      "warningLevel": 1,
+      "filePath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/ClaimSubmission.Web.csproj",
+      "libraryId": "System.Net.Http.Json",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }
