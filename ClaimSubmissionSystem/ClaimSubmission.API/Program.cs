@@ -1,5 +1,6 @@
 using ClaimSubmission.API.Data;
 using ClaimSubmission.API.Services;
+using ClaimSubmission.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +24,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowWeb", policyBuilder =>
     {
         policyBuilder
-            .WithOrigins("http://localhost:5277", "https://localhost:7205")
+            .WithOrigins("http://localhost:5277", "https://localhost:7277")
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials();
@@ -31,6 +32,25 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Add global exception handling middleware
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+
+// Seed test data in development
+if (app.Environment.IsDevelopment())
+{
+    try
+    {
+        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation("Initializing database seeding...");
+        await DataSeeder.SeedTestUsersAsync(builder.Configuration, logger);
+    }
+    catch (Exception ex)
+    {
+        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Error seeding test data during startup");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -50,6 +70,7 @@ app.UseAuthorization();
 
 // Add default root endpoint
 app.MapGet("/", () => "ClaimSubmission API is running. Visit /swagger or /openapi to explore the API.");
+app.MapGet("/health", () => new { status = "healthy", timestamp = DateTime.UtcNow });
 
 app.MapControllers();
 

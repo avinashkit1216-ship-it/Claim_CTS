@@ -81,10 +81,23 @@ namespace ClaimSubmission.Web.Controllers
             catch (UnauthorizedAccessException)
             {
                 ModelState.AddModelError(string.Empty, "Invalid username or password");
+                _logger.LogWarning($"Unauthorized access for user '{model.Username}'");
+            }
+            catch (HttpRequestException hEx) when (hEx.InnerException is TimeoutException || 
+                                                     hEx.Message.Contains("unavailable") ||
+                                                     hEx.Message.Contains("connection"))
+            {
+                ModelState.AddModelError(string.Empty, "Authentication service is currently unavailable. Please try again later.");
+                _logger.LogWarning(hEx, "API service unavailable during login attempt");
+            }
+            catch (HttpRequestException hEx)
+            {
+                ModelState.AddModelError(string.Empty, "Unable to connect to authentication service. Please check your network connection.");
+                _logger.LogError(hEx, "HttpRequest error during login");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during login");
+                _logger.LogError(ex, $"Error during login: {ex.GetType().Name} - {ex.Message}");
                 ModelState.AddModelError(string.Empty, "An error occurred during login. Please try again.");
             }
 

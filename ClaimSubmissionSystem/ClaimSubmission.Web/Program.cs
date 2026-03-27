@@ -29,36 +29,38 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Add HttpClientFactory and service registrations
+// Get API base URL from configuration
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5285";
+
+// Add HttpClientFactory and service registrations with proper configuration
 builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5285/");
+    client.BaseAddress = new Uri(apiBaseUrl + "/");
+    client.Timeout = TimeSpan.FromSeconds(30);
 });
 
+builder.Services.AddHttpClient<IClaimApiService, ClaimApiService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl + "/");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 
-// Register IAuthenticationService -> AuthenticationService with apiBaseUrl injection
+// Register IAuthenticationService factory
 builder.Services.AddScoped<IAuthenticationService>(provider =>
 {
-    var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
-    var httpClient = httpClientFactory.CreateClient(nameof(AuthenticationService));
-    var config = provider.GetRequiredService<IConfiguration>();
-    var apiBaseUrl = config["ApiBaseUrl"] ?? "http://localhost:5285";
-    return new AuthenticationService(httpClient, apiBaseUrl);
+    var factory = provider.GetRequiredService<IHttpClientFactory>();
+    var httpClient = factory.CreateClient(nameof(AuthenticationService));
+    var logger = provider.GetRequiredService<ILogger<AuthenticationService>>();
+    return new AuthenticationService(httpClient, apiBaseUrl, logger);
 });
 
-builder.Services.AddHttpClient<ClaimApiService>()
-    .ConfigureHttpClient((provider, client) =>
-    {
-        // HttpClient configuration can be done here if needed
-    });
-
+// Register IClaimApiService factory
 builder.Services.AddScoped<IClaimApiService>(provider =>
 {
-    var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
-    var httpClient = httpClientFactory.CreateClient(nameof(ClaimApiService));
-    var config = provider.GetRequiredService<IConfiguration>();
-    var apiBaseUrl = config["ApiBaseUrl"] ?? "http://localhost:5285";
-    return new ClaimApiService(httpClient, apiBaseUrl);
+    var factory = provider.GetRequiredService<IHttpClientFactory>();
+    var httpClient = factory.CreateClient(nameof(ClaimApiService));
+    var logger = provider.GetRequiredService<ILogger<ClaimApiService>>();
+    return new ClaimApiService(httpClient, apiBaseUrl, logger);
 });
 
 // Add authentication

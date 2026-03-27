@@ -217,38 +217,60 @@ namespace ClaimSubmission.API.Data
         {
             try
             {
+                _logger.LogDebug($"Starting credential validation for user: {username}");
+
                 using var connection = new SqlConnection(_connectionString);
                 
                 // Fetch user by username
+                _logger.LogDebug($"Querying database for user: {username}");
                 var user = await connection.QueryFirstOrDefaultAsync<User>(
                     "SELECT UserId, Username, Email, FullName, IsActive, PasswordHash FROM Users WHERE Username = @Username AND IsActive = 1",
                     new { Username = username }
                 );
 
                 if (user == null)
+                {
+                    _logger.LogWarning($"User '{username}' not found or inactive in database");
                     return null;
+                }
+
+                _logger.LogDebug($"User '{username}' found (ID: {user.UserId}). Validating password...");
 
                 // Verify password using BCrypt (import BCrypt.Net for this)
-                // For now, do a simple comparison with the hashed password
-                // In production, use: BCrypt.Net.BCrypt.Verify(password, user.PasswordHash)
-                
                 Boolean passwordMatch = false;
                 try
                 {
-                    passwordMatch = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+                    _logger.LogDebug($"Attempting BCrypt password verification for user: {username}");
+                    passwordMatch = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash ?? "");
+                    _logger.LogDebug($"BCrypt verification result: {passwordMatch}");
                 }
-                catch
+                catch (Exception bcryptEx)
                 {
-                    // If BCrypt verification fails, try direct comparison for backward compatibility
-                    using var sha256 = System.Security.Cryptography.SHA256.Create();
-                    var hashedPassword = System.BitConverter.ToString(
-                        sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password))
-                    ).Replace("-", "").ToUpper();
-                    passwordMatch = hashedPassword == user.PasswordHash;
+                    _logger.LogWarning(bcryptEx, $"BCrypt verification failed for user '{username}', attempting SHA256 compatibility check");
+                    
+                    // If BCrypt verification fails, try SHA256 hash for backward compatibility
+                    try
+                    {
+                        using var sha256 = System.Security.Cryptography.SHA256.Create();
+                        var hashBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                        var hashedPassword = System.BitConverter.ToString(hashBytes).Replace("-", "").ToUpper();
+                        passwordMatch = hashedPassword == user.PasswordHash;
+                        _logger.LogDebug($"SHA256 verification result: {passwordMatch}");
+                    }
+                    catch (Exception sha256Ex)
+                    {
+                        _logger.LogError(sha256Ex, $"SHA256 verification also failed for user: {username}");
+                        throw;
+                    }
                 }
 
                 if (!passwordMatch)
+                {
+                    _logger.LogWarning($"Password mismatch for user '{username}'");
                     return null;
+                }
+
+                _logger.LogInformation($"Password validated successfully for user: {username}");
 
                 return new User
                 {
@@ -259,9 +281,14 @@ namespace ClaimSubmission.API.Data
                     IsActive = user.IsActive
                 };
             }
+            catch (SqlException sqlEx)
+            {
+                _logger.LogError(sqlEx, $"SQL database error during credential validation for user '{username}': {sqlEx.Message}");
+                throw;
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error validating credentials for user {username}");
+                _logger.LogError(ex, $"Unexpected error validating credentials for user '{username}': {ex.GetType().Name} - {ex.Message}");
                 throw;
             }
         }

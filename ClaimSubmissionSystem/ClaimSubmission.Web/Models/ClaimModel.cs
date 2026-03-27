@@ -26,12 +26,20 @@ namespace ClaimSubmission.Web.Models
         public List<ClaimViewListModel>? Claims { get; set; }
         public int TotalRecords { get; set; }
         public int PageNumber { get; set; }
-        public int PageSize { get; set; }
+        public int PageSize { get; set; } = 20; // Default to 20 to prevent zero
         public int TotalPages
         {
             get
             {
-                if (PageSize <= 0) return 0;
+                // Safety guard against divide-by-zero
+                if (PageSize <= 0) 
+                {
+                    return TotalRecords > 0 ? 1 : 0;
+                }
+                if (TotalRecords <= 0)
+                {
+                    return 0;
+                }
                 return (int)Math.Ceiling((double)TotalRecords / PageSize);
             }
         }

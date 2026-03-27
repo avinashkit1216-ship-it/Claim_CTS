@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ClaimSubmission.Web")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+92d7124ebd9e38d6fa4a2ae5de5f6db8896e5fd8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d70e3683c6575a0a47269fc138408f297c9b45a0")]
 [assembly: System.Reflection.AssemblyProductAttribute("ClaimSubmission.Web")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ClaimSubmission.Web")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
