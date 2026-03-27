@@ -11,7 +11,6 @@ namespace ClaimSubmission.Web.Controllers
     /// Claims controller for managing claims
     /// User must be authenticated to access these endpoints
     /// </summary>
-    [Authorize]
     public class ClaimController : Controller
     {
         private readonly IClaimApiService _claimApiService;
@@ -35,6 +34,10 @@ namespace ClaimSubmission.Web.Controllers
                 if (!IsUserAuthenticated())
                     return RedirectToAction("Login", "Authentication");
 
+                // Ensure page parameters are valid
+                if (pageNumber <= 0) pageNumber = 1;
+                if (pageSize <= 0) pageSize = 20;
+
                 string token = GetUserToken();
                 
                 var claims = await _claimApiService.GetClaimsAsync(token, pageNumber, pageSize, 
@@ -42,8 +45,13 @@ namespace ClaimSubmission.Web.Controllers
 
                 if (claims == null)
                 {
-                    ViewBag.Error = "Unable to load claims";
-                    return View(new ClaimsPaginatedListViewModel { Claims = new List<ClaimViewListModel>() });
+                    claims = new ClaimsPaginatedListViewModel 
+                    { 
+                        Claims = new List<ClaimViewListModel>(),
+                        PageNumber = pageNumber,
+                        PageSize = pageSize
+                    };
+                    ViewBag.Message = "No claims found.";
                 }
 
                 return View(claims);
@@ -56,8 +64,13 @@ namespace ClaimSubmission.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading claims");
-                ViewBag.Error = $"Error loading claims: {ex.Message}";
-                return View(new ClaimsPaginatedListViewModel { Claims = new List<ClaimViewListModel>() });
+                ViewBag.Error = "An error occurred while loading claims. Please try again.";
+                return View(new ClaimsPaginatedListViewModel 
+                { 
+                    Claims = new List<ClaimViewListModel>(),
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                });
             }
         }
 

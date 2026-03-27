@@ -48,10 +48,7 @@ namespace ClaimSubmission.API.Controllers
                     return BadRequest(new { error = "Username and password are required" });
                 }
 
-                // Hash the password for comparison
-                var passwordHash = _passwordHashService.HashPassword(request.Password);
-
-                // Validate credentials against database
+                // Retrieve user and validate password
                 var user = await _authRepository.ValidateCredentialsAsync(request.Username, request.Password);
                 
                 if (user == null)

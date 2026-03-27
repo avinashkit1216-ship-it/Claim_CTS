@@ -1,65 +1,28 @@
 {
   "version": 2,
-  "dgSpecHash": "iDLRrdIczkg=",
+  "dgSpecHash": "E+7auL8ASck=",
   "success": true,
   "projectFilePath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.API/ClaimSubmission.API.csproj",
   "expectedPackageFiles": [
     "/home/codespace/.nuget/packages/bcrypt.net-next/4.0.3/bcrypt.net-next.4.0.3.nupkg.sha512",
     "/home/codespace/.nuget/packages/dapper/2.1.15/dapper.2.1.15.nupkg.sha512",
     "/home/codespace/.nuget/packages/microsoft.aspnetcore.openapi/10.0.0/microsoft.aspnetcore.openapi.10.0.0.nupkg.sha512",
-    "/home/codespace/.nuget/packages/microsoft.extensions.apidescription.server/6.0.5/microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",
+    "/home/codespace/.nuget/packages/microsoft.extensions.apidescription.server/10.0.0/microsoft.extensions.apidescription.server.10.0.0.nupkg.sha512",
     "/home/codespace/.nuget/packages/microsoft.identitymodel.abstractions/7.1.2/microsoft.identitymodel.abstractions.7.1.2.nupkg.sha512",
     "/home/codespace/.nuget/packages/microsoft.identitymodel.jsonwebtokens/7.1.2/microsoft.identitymodel.jsonwebtokens.7.1.2.nupkg.sha512",
     "/home/codespace/.nuget/packages/microsoft.identitymodel.logging/7.1.2/microsoft.identitymodel.logging.7.1.2.nupkg.sha512",
     "/home/codespace/.nuget/packages/microsoft.identitymodel.tokens/7.1.2/microsoft.identitymodel.tokens.7.1.2.nupkg.sha512",
-    "/home/codespace/.nuget/packages/microsoft.openapi/2.0.0/microsoft.openapi.2.0.0.nupkg.sha512",
+    "/home/codespace/.nuget/packages/microsoft.openapi/2.4.1/microsoft.openapi.2.4.1.nupkg.sha512",
     "/home/codespace/.nuget/packages/runtime.native.system.data.sqlclient.sni/4.7.0/runtime.native.system.data.sqlclient.sni.4.7.0.nupkg.sha512",
     "/home/codespace/.nuget/packages/runtime.win-arm64.runtime.native.system.data.sqlclient.sni/4.4.0/runtime.win-arm64.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
     "/home/codespace/.nuget/packages/runtime.win-x64.runtime.native.system.data.sqlclient.sni/4.4.0/runtime.win-x64.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
     "/home/codespace/.nuget/packages/runtime.win-x86.runtime.native.system.data.sqlclient.sni/4.4.0/runtime.win-x86.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
-    "/home/codespace/.nuget/packages/swashbuckle.aspnetcore/6.5.0/swashbuckle.aspnetcore.6.5.0.nupkg.sha512",
-    "/home/codespace/.nuget/packages/swashbuckle.aspnetcore.swagger/6.5.0/swashbuckle.aspnetcore.swagger.6.5.0.nupkg.sha512",
-    "/home/codespace/.nuget/packages/swashbuckle.aspnetcore.swaggergen/6.5.0/swashbuckle.aspnetcore.swaggergen.6.5.0.nupkg.sha512",
-    "/home/codespace/.nuget/packages/swashbuckle.aspnetcore.swaggerui/6.5.0/swashbuckle.aspnetcore.swaggerui.6.5.0.nupkg.sha512",
+    "/home/codespace/.nuget/packages/swashbuckle.aspnetcore/10.1.7/swashbuckle.aspnetcore.10.1.7.nupkg.sha512",
+    "/home/codespace/.nuget/packages/swashbuckle.aspnetcore.swagger/10.1.7/swashbuckle.aspnetcore.swagger.10.1.7.nupkg.sha512",
+    "/home/codespace/.nuget/packages/swashbuckle.aspnetcore.swaggergen/10.1.7/swashbuckle.aspnetcore.swaggergen.10.1.7.nupkg.sha512",
+    "/home/codespace/.nuget/packages/swashbuckle.aspnetcore.swaggerui/10.1.7/swashbuckle.aspnetcore.swaggerui.10.1.7.nupkg.sha512",
     "/home/codespace/.nuget/packages/system.data.sqlclient/4.8.6/system.data.sqlclient.4.8.6.nupkg.sha512",
     "/home/codespace/.nuget/packages/system.identitymodel.tokens.jwt/7.1.2/system.identitymodel.tokens.jwt.7.1.2.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1603",
-      "level": "Warning",
-      "message": "ClaimSubmission.API depends on Microsoft.IdentityModel.Tokens (>= 7.1.0) but Microsoft.IdentityModel.Tokens 7.1.0 was not found. Microsoft.IdentityModel.Tokens 7.1.2 was resolved instead.",
-      "projectPath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.API/ClaimSubmission.API.csproj",
-      "warningLevel": 1,
-      "filePath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.API/ClaimSubmission.API.csproj",
-      "libraryId": "Microsoft.IdentityModel.Tokens",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    },
-    {
-      "code": "NU1603",
-      "level": "Warning",
-      "message": "ClaimSubmission.API depends on Swashbuckle.AspNetCore (>= 6.4.6) but Swashbuckle.AspNetCore 6.4.6 was not found. Swashbuckle.AspNetCore 6.5.0 was resolved instead.",
-      "projectPath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.API/ClaimSubmission.API.csproj",
-      "warningLevel": 1,
-      "filePath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.API/ClaimSubmission.API.csproj",
-      "libraryId": "Swashbuckle.AspNetCore",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    },
-    {
-      "code": "NU1603",
-      "level": "Warning",
-      "message": "ClaimSubmission.API depends on System.IdentityModel.Tokens.Jwt (>= 7.1.0) but System.IdentityModel.Tokens.Jwt 7.1.0 was not found. System.IdentityModel.Tokens.Jwt 7.1.2 was resolved instead.",
-      "projectPath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.API/ClaimSubmission.API.csproj",
-      "warningLevel": 1,
-      "filePath": "/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.API/ClaimSubmission.API.csproj",
-      "libraryId": "System.IdentityModel.Tokens.Jwt",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    }
-  ]
+  "logs": []
 }

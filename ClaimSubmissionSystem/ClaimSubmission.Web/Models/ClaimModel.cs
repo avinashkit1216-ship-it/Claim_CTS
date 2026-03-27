@@ -27,7 +27,14 @@ namespace ClaimSubmission.Web.Models
         public int TotalRecords { get; set; }
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
-        public int TotalPages => (TotalRecords + PageSize - 1) / PageSize;
+        public int TotalPages
+        {
+            get
+            {
+                if (PageSize <= 0) return 0;
+                return (int)Math.Ceiling((double)TotalRecords / PageSize);
+            }
+        }
         
         // For filtering and searching
         public string? SearchTerm { get; set; }

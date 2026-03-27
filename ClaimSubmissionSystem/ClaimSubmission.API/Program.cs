@@ -39,10 +39,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    app.UseHttpsRedirection();
+}
 
-app.UseHttpsRedirection();
+app.UseRouting();
 app.UseCors("AllowWeb");
 app.UseAuthorization();
+
+// Add default root endpoint
+app.MapGet("/", () => "ClaimSubmission API is running. Visit /swagger or /openapi to explore the API.");
+
 app.MapControllers();
 
 app.Run();

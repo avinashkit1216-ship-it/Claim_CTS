@@ -45,6 +45,10 @@ namespace ClaimSubmission.Web.Services
         {
             try
             {
+                // Ensure PageSize is always positive to prevent divide-by-zero
+                if (pageSize <= 0) pageSize = 20;
+                if (pageNumber <= 0) pageNumber = 1;
+
                 var queryParams = new Dictionary<string, string>
                 {
                     { "pageNumber", pageNumber.ToString() },
@@ -73,7 +77,16 @@ namespace ClaimSubmission.Web.Services
                         {
                             var responseContent = await response.Content.ReadAsStringAsync();
                             if (string.IsNullOrWhiteSpace(responseContent))
-                                return null;
+                            {
+                                _logger?.LogWarning("Empty response from API");
+                                return new ClaimsPaginatedListViewModel
+                                {
+                                    Claims = new List<ClaimViewListModel>(),
+                                    TotalRecords = 0,
+                                    PageNumber = pageNumber,
+                                    PageSize = pageSize
+                                };
+                            }
 
                             using (JsonDocument doc = JsonDocument.Parse(responseContent))
                             {
@@ -88,7 +101,7 @@ namespace ClaimSubmission.Web.Services
                                     {
                                         return new ClaimsPaginatedListViewModel
                                         {
-                                            Claims = paginatedData.Claims,
+                                            Claims = paginatedData.Claims ?? new List<ClaimViewListModel>(),
                                             TotalRecords = paginatedData.TotalRecords,
                                             PageNumber = pageNumber,
                                             PageSize = pageSize,
@@ -103,19 +116,71 @@ namespace ClaimSubmission.Web.Services
                         }
                         else
                         {
-                            _logger?.LogError($"API Error: {response.StatusCode}");
-                            throw new Exception($"API Error: {response.StatusCode}");
+                            string errorMessage = $"API returned error: {response.StatusCode}";
+                            try
+                            {
+                                var errorContent = await response.Content.ReadAsStringAsync();
+                                _logger?.LogError($"{errorMessage}. Details: {errorContent}");
+                            }
+                            catch
+                            {
+                                _logger?.LogError(errorMessage);
+                            }
+
+                            // Return empty list instead of throwing to prevent app crash
+                            return new ClaimsPaginatedListViewModel
+                            {
+                                Claims = new List<ClaimViewListModel>(),
+                                TotalRecords = 0,
+                                PageNumber = pageNumber,
+                                PageSize = pageSize
+                            };
                         }
                     }
                 }
             }
+            catch (HttpRequestException ex)
+            {
+                _logger?.LogError(ex, "HTTP request error retrieving claims");
+                return new ClaimsPaginatedListViewModel
+                {
+                    Claims = new List<ClaimViewListModel>(),
+                    TotalRecords = 0,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                };
+            }
+            catch (JsonException ex)
+            {
+                _logger?.LogError(ex, "JSON parsing error retrieving claims");
+                return new ClaimsPaginatedListViewModel
+                {
+                    Claims = new List<ClaimViewListModel>(),
+                    TotalRecords = 0,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                };
+            }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Error retrieving claims");
-                throw;
+                _logger?.LogError(ex, "Unexpected error retrieving claims");
+                return new ClaimsPaginatedListViewModel
+                {
+                    Claims = new List<ClaimViewListModel>(),
+                    TotalRecords = 0,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                };
             }
 
-            return null;
+            // Default return if no other condition is met
+            return new ClaimsPaginatedListViewModel
+            {
+                Claims = new List<ClaimViewListModel>(),
+                TotalRecords = 0,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
         }
 
         /// <summary>

@@ -213,30 +213,51 @@ namespace ClaimSubmission.API.Data
             _logger = logger;
         }
 
-        public async Task<User?> ValidateCredentialsAsync(string username, string passwordHash)
+        public async Task<User?> ValidateCredentialsAsync(string username, string password)
         {
             try
             {
                 using var connection = new SqlConnection(_connectionString);
-                var userIdParam = new DynamicParameters();
-                userIdParam.Add("@Username", username);
-                userIdParam.Add("@PasswordHash", passwordHash);
-                userIdParam.Add("@UserId", dbType: DbType.Int32, direction: ParameterDirection.Output);
-
-                await connection.ExecuteAsync(
-                    "sp_User_ValidateCredentials",
-                    userIdParam,
-                    commandType: CommandType.StoredProcedure
+                
+                // Fetch user by username
+                var user = await connection.QueryFirstOrDefaultAsync<User>(
+                    "SELECT UserId, Username, Email, FullName, IsActive, PasswordHash FROM Users WHERE Username = @Username AND IsActive = 1",
+                    new { Username = username }
                 );
 
-                var userId = userIdParam.Get<int>("@UserId");
-                if (userId <= 0) return null;
+                if (user == null)
+                    return null;
 
-                // Fetch user details
-                return await connection.QueryFirstOrDefaultAsync<User>(
-                    "SELECT UserId, Username, Email, FullName, IsActive FROM Users WHERE UserId = @UserId",
-                    new { UserId = userId }
-                );
+                // Verify password using BCrypt (import BCrypt.Net for this)
+                // For now, do a simple comparison with the hashed password
+                // In production, use: BCrypt.Net.BCrypt.Verify(password, user.PasswordHash)
+                
+                Boolean passwordMatch = false;
+                try
+                {
+                    passwordMatch = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+                }
+                catch
+                {
+                    // If BCrypt verification fails, try direct comparison for backward compatibility
+                    using var sha256 = System.Security.Cryptography.SHA256.Create();
+                    var hashedPassword = System.BitConverter.ToString(
+                        sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password))
+                    ).Replace("-", "").ToUpper();
+                    passwordMatch = hashedPassword == user.PasswordHash;
+                }
+
+                if (!passwordMatch)
+                    return null;
+
+                return new User
+                {
+                    UserId = user.UserId,
+                    Username = user.Username,
+                    Email = user.Email,
+                    FullName = user.FullName,
+                    IsActive = user.IsActive
+                };
             }
             catch (Exception ex)
             {

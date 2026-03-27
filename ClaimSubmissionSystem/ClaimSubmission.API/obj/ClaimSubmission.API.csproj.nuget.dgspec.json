@@ -58,11 +58,11 @@
             },
             "Microsoft.IdentityModel.Tokens": {
               "target": "Package",
-              "version": "[7.1.0, )"
+              "version": "[7.1.2, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
-              "version": "[6.4.6, )"
+              "version": "[10.1.7, )"
             },
             "System.Data.SqlClient": {
               "target": "Package",
@@ -70,7 +70,7 @@
             },
             "System.IdentityModel.Tokens.Jwt": {
               "target": "Package",
-              "version": "[7.1.0, )"
+              "version": "[7.1.2, )"
             }
           },
           "imports": [
