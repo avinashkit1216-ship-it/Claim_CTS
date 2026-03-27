@@ -48,3 +48,4 @@
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.API/obj/Debug/net10.0/ClaimSubmission.API.pdb
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.API/obj/Debug/net10.0/ClaimSubmission.API.genruntimeconfig.cache
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.API/obj/Debug/net10.0/ref/ClaimSubmission.API.dll
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.API/bin/Debug/net10.0/appsettings.Production.json

@@ -96,3 +96,4 @@
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/ClaimSubmission.Web.pdb
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/ClaimSubmission.Web.genruntimeconfig.cache
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/ref/ClaimSubmission.Web.dll
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/bin/Debug/net10.0/appsettings.Production.json
