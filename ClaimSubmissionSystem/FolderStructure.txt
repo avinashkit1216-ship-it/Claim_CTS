@@ -1,0 +1,369 @@
+ClaimSubmissionSystem/
+├── ClaimDb/
+│   ├── AuthenticationStoredProcedures.sql
+│   ├── ClaimStoredProcedures.sql
+│   ├── CreateDataBase.sql
+│   ├── SampleData.sql
+│   └── Table_Claims.sql
+├── ClaimSubmission.API/
+│   ├── ClaimSubmission.API.csproj
+│   ├── ClaimSubmission.API.http
+│   ├── Controllers/
+│   │   ├── AuthController.cs
+│   │   └── ClaimsController.cs
+│   ├── DTOs/
+│   │   ├── ClaimDto.cs
+│   │   ├── LoginRequest.cs
+│   │   └── LoginResponse.cs
+│   ├── Data/
+│   │   ├── DataSeeder.cs
+│   │   ├── IRepositories.cs
+│   │   └── Repositories.cs
+│   ├── Middleware/
+│   │   └── GlobalExceptionHandlerMiddleware.cs
+│   ├── Models/
+│   │   └── DomainModels.cs
+│   ├── Program.cs
+│   ├── Properties/
+│   │   └── launchSettings.json
+│   ├── Services/
+│   │   ├── JwtTokenService.cs
+│   │   └── PasswordHashService.cs
+│   ├── appsettings.Development.json
+│   ├── appsettings.Production.json
+│   ├── appsettings.json
+│   ├── bin/
+│   │   └── Debug/
+│   │       └── net10.0/
+│   │           ├── BCrypt.Net-Next.dll
+│   │           ├── ClaimSubmission.API
+│   │           ├── ClaimSubmission.API.deps.json
+│   │           ├── ClaimSubmission.API.dll
+│   │           ├── ClaimSubmission.API.pdb
+│   │           ├── ClaimSubmission.API.runtimeconfig.json
+│   │           ├── ClaimSubmission.API.staticwebassets.endpoints.json
+│   │           ├── Dapper.dll
+│   │           ├── Microsoft.AspNetCore.OpenApi.dll
+│   │           ├── Microsoft.IdentityModel.Abstractions.dll
+│   │           ├── Microsoft.IdentityModel.JsonWebTokens.dll
+│   │           ├── Microsoft.IdentityModel.Logging.dll
+│   │           ├── Microsoft.IdentityModel.Tokens.dll
+│   │           ├── Microsoft.OpenApi.dll
+│   │           ├── Swashbuckle.AspNetCore.Swagger.dll
+│   │           ├── Swashbuckle.AspNetCore.SwaggerGen.dll
+│   │           ├── Swashbuckle.AspNetCore.SwaggerUI.dll
+│   │           ├── System.Data.SqlClient.dll
+│   │           ├── System.IdentityModel.Tokens.Jwt.dll
+│   │           ├── appsettings.Development.json
+│   │           ├── appsettings.Production.json
+│   │           ├── appsettings.json
+│   │           └── runtimes/
+│   │               ├── unix/
+│   │               │   └── lib/
+│   │               │       └── netcoreapp2.1/
+│   │               │           └── System.Data.SqlClient.dll
+│   │               ├── win/
+│   │               │   └── lib/
+│   │               │       └── netcoreapp2.1/
+│   │               │           └── System.Data.SqlClient.dll
+│   │               ├── win-arm64/
+│   │               │   └── native/
+│   │               │       └── sni.dll
+│   │               ├── win-x64/
+│   │               │   └── native/
+│   │               │       └── sni.dll
+│   │               └── win-x86/
+│   │                   └── native/
+│   │                       └── sni.dll
+│   └── obj/
+│       ├── ClaimSubmission.API.csproj.nuget.dgspec.json
+│       ├── ClaimSubmission.API.csproj.nuget.g.props
+│       ├── ClaimSubmission.API.csproj.nuget.g.targets
+│       ├── Debug/
+│       │   └── net10.0/
+│       │       ├── ClaimSub.91898F68.Up2Date
+│       │       ├── ClaimSubmission.API.AssemblyInfo.cs
+│       │       ├── ClaimSubmission.API.AssemblyInfoInputs.cache
+│       │       ├── ClaimSubmission.API.GeneratedMSBuildEditorConfig.editorconfig
+│       │       ├── ClaimSubmission.API.GlobalUsings.g.cs
+│       │       ├── ClaimSubmission.API.MvcApplicationPartsAssemblyInfo.cache
+│       │       ├── ClaimSubmission.API.MvcApplicationPartsAssemblyInfo.cs
+│       │       ├── ClaimSubmission.API.assets.cache
+│       │       ├── ClaimSubmission.API.csproj.AssemblyReference.cache
+│       │       ├── ClaimSubmission.API.csproj.CoreCompileInputs.cache
+│       │       ├── ClaimSubmission.API.csproj.FileListAbsolute.txt
+│       │       ├── ClaimSubmission.API.dll
+│       │       ├── ClaimSubmission.API.genruntimeconfig.cache
+│       │       ├── ClaimSubmission.API.pdb
+│       │       ├── ClaimSubmission.API.sourcelink.json
+│       │       ├── apphost
+│       │       ├── ref/
+│       │       │   └── ClaimSubmission.API.dll
+│       │       ├── refint/
+│       │       │   └── ClaimSubmission.API.dll
+│       │       ├── rjsmcshtml.dswa.cache.json
+│       │       ├── rjsmrazor.dswa.cache.json
+│       │       ├── rpswa.dswa.cache.json
+│       │       ├── staticwebassets/
+│       │       ├── staticwebassets.build.endpoints.json
+│       │       ├── staticwebassets.build.json
+│       │       ├── staticwebassets.build.json.cache
+│       │       └── swae.build.ex.cache
+│       ├── project.assets.json
+│       └── project.nuget.cache
+├── ClaimSubmission.Web/
+│   ├── ClaimSubmission.Web.csproj
+│   ├── Controllers/
+│   │   ├── AuthenticationController.cs
+│   │   ├── ClaimController.cs
+│   │   └── HomeController.cs
+│   ├── Models/
+│   │   ├── ClaimModel.cs
+│   │   └── ErrorViewModel.cs
+│   ├── Program.cs
+│   ├── Properties/
+│   │   └── launchSettings.json
+│   ├── Services/
+│   │   ├── ClaimApiService.cs
+│   │   ├── IAuthenticationService.cs
+│   │   └── ViewModels.cs
+│   ├── Views/
+│   │   ├── Authentication/
+│   │   │   └── Login.cshtml
+│   │   ├── Claim/
+│   │   │   ├── Add.cshtml
+│   │   │   ├── Create.cshtml
+│   │   │   ├── Edit.cshtml
+│   │   │   ├── Index.cshtml
+│   │   │   └── List.cshtml
+│   │   ├── Home/
+│   │   │   ├── Index.cshtml
+│   │   │   └── Privacy.cshtml
+│   │   ├── Shared/
+│   │   │   ├── Error.cshtml
+│   │   │   ├── _Layout.cshtml
+│   │   │   ├── _Layout.cshtml.css
+│   │   │   └── _ValidationScriptsPartial.cshtml
+│   │   ├── _ViewImports.cshtml
+│   │   └── _ViewStart.cshtml
+│   ├── appsettings.Development.json
+│   ├── appsettings.Production.json
+│   ├── appsettings.json
+│   ├── bin/
+│   │   └── Debug/
+│   │       └── net10.0/
+│   │           ├── ClaimSubmission.Web
+│   │           ├── ClaimSubmission.Web.deps.json
+│   │           ├── ClaimSubmission.Web.dll
+│   │           ├── ClaimSubmission.Web.pdb
+│   │           ├── ClaimSubmission.Web.runtimeconfig.json
+│   │           ├── ClaimSubmission.Web.staticwebassets.endpoints.json
+│   │           ├── ClaimSubmission.Web.staticwebassets.runtime.json
+│   │           ├── appsettings.Development.json
+│   │           ├── appsettings.Production.json
+│   │           └── appsettings.json
+│   ├── obj/
+│   │   ├── ClaimSubmission.Web.csproj.nuget.dgspec.json
+│   │   ├── ClaimSubmission.Web.csproj.nuget.g.props
+│   │   ├── ClaimSubmission.Web.csproj.nuget.g.targets
+│   │   ├── Debug/
+│   │   │   └── net10.0/
+│   │   │       ├── ClaimSubmission.Web.AssemblyInfo.cs
+│   │   │       ├── ClaimSubmission.Web.AssemblyInfoInputs.cache
+│   │   │       ├── ClaimSubmission.Web.GeneratedMSBuildEditorConfig.editorconfig
+│   │   │       ├── ClaimSubmission.Web.GlobalUsings.g.cs
+│   │   │       ├── ClaimSubmission.Web.MvcApplicationPartsAssemblyInfo.cache
+│   │   │       ├── ClaimSubmission.Web.RazorAssemblyInfo.cache
+│   │   │       ├── ClaimSubmission.Web.RazorAssemblyInfo.cs
+│   │   │       ├── ClaimSubmission.Web.assets.cache
+│   │   │       ├── ClaimSubmission.Web.csproj.CoreCompileInputs.cache
+│   │   │       ├── ClaimSubmission.Web.csproj.FileListAbsolute.txt
+│   │   │       ├── ClaimSubmission.Web.dll
+│   │   │       ├── ClaimSubmission.Web.genruntimeconfig.cache
+│   │   │       ├── ClaimSubmission.Web.pdb
+│   │   │       ├── ClaimSubmission.Web.sourcelink.json
+│   │   │       ├── apphost
+│   │   │       ├── compressed/
+│   │   │       │   ├── 06d5g026jf-{0}-06098lyss8-06098lyss8.gz
+│   │   │       │   ├── 0mnsupf353-{0}-k8d9w2qqmf-k8d9w2qqmf.gz
+│   │   │       │   ├── 0pmub36bii-{0}-2z0ns9nrw6-2z0ns9nrw6.gz
+│   │   │       │   ├── 0zxw4oj9lx-{0}-bqjiyaj88i-bqjiyaj88i.gz
+│   │   │       │   ├── 145djep8df-{0}-c2oey78nd0-c2oey78nd0.gz
+│   │   │       │   ├── 17k5wiwmwq-{0}-37tfw0ft22-37tfw0ft22.gz
+│   │   │       │   ├── 249nfogu6l-{0}-6cfz1n2cew-6cfz1n2cew.gz
+│   │   │       │   ├── 2aol0dj7ze-{0}-ausgxo2sd3-ausgxo2sd3.gz
+│   │   │       │   ├── 3c2ggu0gis-{0}-qlccset4i1-qlccset4i1.gz
+│   │   │       │   ├── 3cw6i2jgyv-{0}-o1o13a6vjx-o1o13a6vjx.gz
+│   │   │       │   ├── 3nju50gmgl-{0}-b7pk76d08c-b7pk76d08c.gz
+│   │   │       │   ├── 3o5fsk7ron-{0}-46ein0sx1k-46ein0sx1k.gz
+│   │   │       │   ├── 3qxnaegbii-{0}-4v8eqarkd7-4v8eqarkd7.gz
+│   │   │       │   ├── 3t957olwo7-{0}-jd9uben2k1-jd9uben2k1.gz
+│   │   │       │   ├── 4esjtln0ah-{0}-jfsiqqwiad-jfsiqqwiad.gz
+│   │   │       │   ├── 4pc93kcif8-{0}-63fj8s7r0e-63fj8s7r0e.gz
+│   │   │       │   ├── 59edbyb0sv-{0}-ee0r1s7dh0-ee0r1s7dh0.gz
+│   │   │       │   ├── 5fochjtlpr-{0}-pj5nd1wqec-pj5nd1wqec.gz
+│   │   │       │   ├── 6rr5jbal07-{0}-mu0hr4573q-mu0hr4573q.gz
+│   │   │       │   ├── 71ap879ygq-{0}-c2jlpeoesf-c2jlpeoesf.gz
+│   │   │       │   ├── 7cxrzo6uw8-{0}-muycvpuwrr-muycvpuwrr.gz
+│   │   │       │   ├── 7ks9kx5rrq-{0}-iovd86k7lj-iovd86k7lj.gz
+│   │   │       │   ├── 7rbt2vva0q-{0}-ub07r2b239-ub07r2b239.gz
+│   │   │       │   ├── 80gi3v5uni-{0}-6pdc2jztkx-6pdc2jztkx.gz
+│   │   │       │   ├── 8tmfdd8sjy-{0}-mu0hr4573q-mu0hr4573q.gz
+│   │   │       │   ├── 9h7abb8f2e-{0}-ag7o75518u-ag7o75518u.gz
+│   │   │       │   ├── adhqfs1gwg-{0}-cosvhxvwiu-cosvhxvwiu.gz
+│   │   │       │   ├── ag1xshcrf2-{0}-h1s4sie4z3-h1s4sie4z3.gz
+│   │   │       │   ├── br5h6c0j9e-{0}-ttgo8qnofa-ttgo8qnofa.gz
+│   │   │       │   ├── btzcm4qjnv-{0}-tdbxkamptv-tdbxkamptv.gz
+│   │   │       │   ├── cd7vjta2cw-{0}-pk9g2wxc8p-pk9g2wxc8p.gz
+│   │   │       │   ├── eyxg4kqfyd-{0}-kbrnm935zg-kbrnm935zg.gz
+│   │   │       │   ├── fux40rtl85-{0}-j5mq2jizvt-j5mq2jizvt.gz
+│   │   │       │   ├── gdu4e6ut2u-{0}-r4e9w2rdcm-r4e9w2rdcm.gz
+│   │   │       │   ├── gvimdmr0wg-{0}-493y06b0oq-493y06b0oq.gz
+│   │   │       │   ├── h7yznfly5g-{0}-vr1egmr9el-vr1egmr9el.gz
+│   │   │       │   ├── hnpc62bd0u-{0}-lugek5hnai-lugek5hnai.gz
+│   │   │       │   ├── ipblssvedu-{0}-0j3bgjxly4-0j3bgjxly4.gz
+│   │   │       │   ├── itone72hh8-{0}-ft3s53vfgj-ft3s53vfgj.gz
+│   │   │       │   ├── j36rgvi8ll-{0}-fsbi9cje9m-fsbi9cje9m.gz
+│   │   │       │   ├── jfcr56utsv-{0}-jj8uyg4cgr-jj8uyg4cgr.gz
+│   │   │       │   ├── k2djn7zbdv-{0}-lcd1t2u6c8-lcd1t2u6c8.gz
+│   │   │       │   ├── mx8baxcvv7-{0}-ilo7uva0vt-ilo7uva0vt.gz
+│   │   │       │   ├── p2i8ebzrbf-{0}-v0zj4ognzu-v0zj4ognzu.gz
+│   │   │       │   ├── rofftcbxj6-{0}-aexeepp0ev-aexeepp0ev.gz
+│   │   │       │   ├── sa8c10pnl5-{0}-rzd6atqjts-rzd6atqjts.gz
+│   │   │       │   ├── srvpyho2pl-{0}-lzl9nlhx6b-lzl9nlhx6b.gz
+│   │   │       │   ├── t4qbsk871i-{0}-s35ty4nyc5-s35ty4nyc5.gz
+│   │   │       │   ├── tw83iphok0-{0}-xzw0cte36n-xzw0cte36n.gz
+│   │   │       │   ├── u4oy9cimbd-{0}-hrwsygsryq-hrwsygsryq.gz
+│   │   │       │   ├── ucuj92eto2-{0}-fvhpjtyr6v-fvhpjtyr6v.gz
+│   │   │       │   ├── ulht19st71-{0}-0i3buxo5is-0i3buxo5is.gz
+│   │   │       │   ├── uqzdw45n1x-{0}-l3n5xuwxn8-l3n5xuwxn8.gz
+│   │   │       │   ├── wizt2v0qd0-{0}-nvvlpmu67g-nvvlpmu67g.gz
+│   │   │       │   ├── wr8mu5bo5r-{0}-y7v9cxd14o-y7v9cxd14o.gz
+│   │   │       │   ├── xarr7n1e8m-{0}-notf2xhcfb-notf2xhcfb.gz
+│   │   │       │   ├── xfdo2th66w-{0}-61n19gt1b8-61n19gt1b8.gz
+│   │   │       │   ├── xrgy1l3v5c-{0}-dxx9fxp4il-dxx9fxp4il.gz
+│   │   │       │   ├── y71v01v30e-{0}-khv3u5hwcm-khv3u5hwcm.gz
+│   │   │       │   ├── yxkwwkm0zn-{0}-fr7q2aak1r-fr7q2aak1r.gz
+│   │   │       │   ├── z2h3519we7-{0}-87fc7y1x7t-87fc7y1x7t.gz
+│   │   │       │   ├── z6nr06p5b4-{0}-47otxtyo56-47otxtyo56.gz
+│   │   │       │   ├── zjxdrqa1ev-{0}-d7shbmvgxk-d7shbmvgxk.gz
+│   │   │       │   └── zvy61vsjel-{0}-erw9l3u2r3-erw9l3u2r3.gz
+│   │   │       ├── rbcswa.dswa.cache.json
+│   │   │       ├── ref/
+│   │   │       │   └── ClaimSubmission.Web.dll
+│   │   │       ├── refint/
+│   │   │       │   └── ClaimSubmission.Web.dll
+│   │   │       ├── rjimswa.dswa.cache.json
+│   │   │       ├── rjsmcshtml.dswa.cache.json
+│   │   │       ├── rjsmrazor.dswa.cache.json
+│   │   │       ├── rpswa.dswa.cache.json
+│   │   │       ├── scopedcss/
+│   │   │       │   ├── Views/
+│   │   │       │   │   └── Shared/
+│   │   │       │   │       └── _Layout.cshtml.rz.scp.css
+│   │   │       │   ├── bundle/
+│   │   │       │   │   └── ClaimSubmission.Web.styles.css
+│   │   │       │   └── projectbundle/
+│   │   │       │       └── ClaimSubmission.Web.bundle.scp.css
+│   │   │       ├── staticwebassets/
+│   │   │       ├── staticwebassets.build.endpoints.json
+│   │   │       ├── staticwebassets.build.json
+│   │   │       ├── staticwebassets.build.json.cache
+│   │   │       ├── staticwebassets.development.json
+│   │   │       └── swae.build.ex.cache
+│   │   ├── project.assets.json
+│   │   └── project.nuget.cache
+│   └── wwwroot/
+│       ├── css/
+│       │   └── site.css
+│       ├── favicon.ico
+│       ├── js/
+│       │   └── site.js
+│       └── lib/
+│           ├── bootstrap/
+│           │   ├── LICENSE
+│           │   └── dist/
+│           │       ├── css/
+│           │       │   ├── bootstrap-grid.css
+│           │       │   ├── bootstrap-grid.css.map
+│           │       │   ├── bootstrap-grid.min.css
+│           │       │   ├── bootstrap-grid.min.css.map
+│           │       │   ├── bootstrap-grid.rtl.css
+│           │       │   ├── bootstrap-grid.rtl.css.map
+│           │       │   ├── bootstrap-grid.rtl.min.css
+│           │       │   ├── bootstrap-grid.rtl.min.css.map
+│           │       │   ├── bootstrap-reboot.css
+│           │       │   ├── bootstrap-reboot.css.map
+│           │       │   ├── bootstrap-reboot.min.css
+│           │       │   ├── bootstrap-reboot.min.css.map
+│           │       │   ├── bootstrap-reboot.rtl.css
+│           │       │   ├── bootstrap-reboot.rtl.css.map
+│           │       │   ├── bootstrap-reboot.rtl.min.css
+│           │       │   ├── bootstrap-reboot.rtl.min.css.map
+│           │       │   ├── bootstrap-utilities.css
+│           │       │   ├── bootstrap-utilities.css.map
+│           │       │   ├── bootstrap-utilities.min.css
+│           │       │   ├── bootstrap-utilities.min.css.map
+│           │       │   ├── bootstrap-utilities.rtl.css
+│           │       │   ├── bootstrap-utilities.rtl.css.map
+│           │       │   ├── bootstrap-utilities.rtl.min.css
+│           │       │   ├── bootstrap-utilities.rtl.min.css.map
+│           │       │   ├── bootstrap.css
+│           │       │   ├── bootstrap.css.map
+│           │       │   ├── bootstrap.min.css
+│           │       │   ├── bootstrap.min.css.map
+│           │       │   ├── bootstrap.rtl.css
+│           │       │   ├── bootstrap.rtl.css.map
+│           │       │   ├── bootstrap.rtl.min.css
+│           │       │   └── bootstrap.rtl.min.css.map
+│           │       └── js/
+│           │           ├── bootstrap.bundle.js
+│           │           ├── bootstrap.bundle.js.map
+│           │           ├── bootstrap.bundle.min.js
+│           │           ├── bootstrap.bundle.min.js.map
+│           │           ├── bootstrap.esm.js
+│           │           ├── bootstrap.esm.js.map
+│           │           ├── bootstrap.esm.min.js
+│           │           ├── bootstrap.esm.min.js.map
+│           │           ├── bootstrap.js
+│           │           ├── bootstrap.js.map
+│           │           ├── bootstrap.min.js
+│           │           └── bootstrap.min.js.map
+│           ├── jquery/
+│           │   ├── LICENSE.txt
+│           │   └── dist/
+│           │       ├── jquery.js
+│           │       ├── jquery.min.js
+│           │       ├── jquery.min.map
+│           │       ├── jquery.slim.js
+│           │       ├── jquery.slim.min.js
+│           │       └── jquery.slim.min.map
+│           ├── jquery-validation/
+│           │   ├── LICENSE.md
+│           │   └── dist/
+│           │       ├── additional-methods.js
+│           │       ├── additional-methods.min.js
+│           │       ├── jquery.validate.js
+│           │       └── jquery.validate.min.js
+│           └── jquery-validation-unobtrusive/
+│               ├── LICENSE.txt
+│               └── dist/
+│                   ├── jquery.validate.unobtrusive.js
+│                   └── jquery.validate.unobtrusive.min.js
+├── ClaimSubmissionSystem.slnx
+├── DATABASE_SETUP_GUIDE.md
+├── DELIVERY_SUMMARY.md
+├── DEPLOYMENT_GUIDE.md
+├── FILES_MODIFIED.md
+├── FIX_SUMMARY.md
+├── HTTPS_REDIRECT_FIX.md
+├── IMPLEMENTATION_COMPLETE.md
+├── LOGIN_FIX_DOCUMENTATION.md
+├── QUICK_REFERENCE.md
+├── QUICK_START_GUIDE.md
+├── README_FIXES.md
+├── RESOLUTION_SUMMARY.md
+├── SWASHBUCKLE_RESOLUTION_FINAL.md
+├── WEB_API_INTEGRATION_REPORT.md
+├── build_output.log
+└── test_login_api.sh

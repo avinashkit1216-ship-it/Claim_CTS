@@ -13,118 +13,292 @@
     <title>@ViewData["Title"] - Claim Submission System</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dark-theme.css" asp-append-version="true" />
     <style>
         html, body {
             height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1a202c 50%, #2d3748 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
 
         body {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            overflow: hidden;
         }
 
-        .login-container {
+        /* Animated Background Elements */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            top: -50%;
+            right: -10%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 15s ease-in-out infinite;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            bottom: -20%;
+            left: -5%;
+            background: radial-gradient(circle, rgba(20, 184, 166, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 20s ease-in-out infinite reverse;
+        }
+
+        @@keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(20px);
+            }
+        }
+
+        .login-wrapper {
+            position: relative;
+            z-index: 1;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             padding: 20px;
         }
 
         .login-card {
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            border: none;
-            border-radius: 10px;
+            background-color: rgba(26, 32, 44, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .login-card:hover {
+            box-shadow: 0 30px 80px rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.4);
         }
 
         .login-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
+            background: linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%);
+            padding: 40px 30px;
             text-align: center;
-            border-radius: 10px 10px 0 0;
+            position: relative;
+        }
+
+        .login-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
         }
 
         .login-header h1 {
-            font-size: 24px;
-            font-weight: 600;
-            margin: 0 0 5px 0;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: white;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
         }
 
         .login-header p {
             font-size: 14px;
             margin: 0;
-            opacity: 0.9;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
         }
 
         .login-body {
-            padding: 30px;
+            padding: 40px 30px;
+            background-color: #0f172a;
         }
 
-        .form-control {
-            border-radius: 5px;
-            padding: 12px 15px;
-            font-size: 14px;
-            border: 1px solid #ddd;
+        .form-control,
+        .form-select {
+            background-color: rgba(45, 55, 72, 0.6);
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            color: #f1f5f9;
+            padding: 12px 16px;
+            font-size: 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
 
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        .form-control::placeholder {
+            color: #94a3b8;
         }
 
-        .btn-login {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            padding: 12px;
-            font-size: 16px;
+        .form-control:focus,
+        .form-select:focus {
+            background-color: rgba(45, 55, 72, 0.8);
+            border-color: #3b82f6;
+            color: #f1f5f9;
+            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+        }
+
+        .form-label {
+            color: #3b82f6;
             font-weight: 600;
-            border-radius: 5px;
-        }
-
-        .btn-login:hover {
-            background: linear-gradient(135deg, #5568d3 0%, #6a3f96 100%);
-            color: white;
-        }
-
-        .alert {
-            border-radius: 5px;
-            margin-bottom: 20px;
+            font-size: 14px;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .form-check-input {
+            width: 20px;
+            height: 20px;
+            margin-top: 3px;
+            accent-color: #3b82f6;
+        }
+
+        .form-check-label {
+            color: #cbd5e1;
+            margin-left: 0.5rem;
+            font-weight: 500;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%);
+            border: none;
+            color: white;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-login:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid;
+            font-weight: 500;
+        }
+
+        .alert-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #fecaca;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .error-text {
+            color: #fca5a5;
+            font-size: 13px;
             margin-top: 5px;
+            display: block;
+            font-weight: 500;
+        }
+
+        .divider {
+            background: linear-gradient(90deg, transparent, #334155, transparent);
+            height: 1px;
+            margin: 25px 0;
         }
 
         .footer-text {
             text-align: center;
             margin-top: 20px;
-            color: #666;
+            color: #94a3b8;
             font-size: 13px;
+            line-height: 1.6;
         }
 
-        .error-text {
-            color: #dc3545;
-            font-size: 13px;
-            margin-top: 5px;
+        .footer-text a {
+            color: #3b82f6;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-text a:hover {
+            color: #14b8a6;
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 576px) {
+            .login-header {
+                padding: 30px 20px;
+            }
+
+            .login-header h1 {
+                font-size: 24px;
+            }
+
+            .login-body {
+                padding: 30px 20px;
+            }
+
+            .login-wrapper {
+                padding: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="card login-card">
+    <div class="login-wrapper">
+        <div class="login-card">
             <div class="login-header">
-                <h1>Claim Submission System</h1>
-                <p>Secure Portal</p>
+                <h1>Claim Submission</h1>
+                <p>Secure Portal Access</p>
             </div>
             <div class="login-body">
                 @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
                 {
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <strong>Login Failed!</strong>
-                        @Html.ValidationSummary(false)
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <strong>⚠️ Login Failed!</strong>
+                        <div style="margin-top: 8px;">
+                            @Html.ValidationSummary(false)
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="filter: invert(1) grayscale(0) brightness(1.8);"></button>
                     </div>
                 }
 
@@ -132,31 +306,37 @@
                     @Html.AntiForgeryToken()
 
                     <div class="mb-3">
-                        <label asp-for="Username" class="form-label fw-500">Username</label>
-                        <input asp-for="Username" class="form-control @(ViewData.ModelState.ContainsKey(nameof(LoginViewModel.Username)) && ViewData.ModelState[nameof(LoginViewModel.Username)]?.Errors.Count > 0 ? "is-invalid" : "")" 
-                               placeholder="Enter your username" required autofocus />
+                        <label asp-for="Username" class="form-label">Username</label>
+                        <input asp-for="Username" 
+                               class="form-control @(ViewData.ModelState.ContainsKey(nameof(LoginViewModel.Username)) && ViewData.ModelState[nameof(LoginViewModel.Username)]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                               placeholder="Enter your username" 
+                               required 
+                               autofocus />
                         <span asp-validation-for="Username" class="error-text"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Password" class="form-label fw-500">Password</label>
-                        <input asp-for="Password" type="password" class="form-control @(ViewData.ModelState.ContainsKey(nameof(LoginViewModel.Password)) && ViewData.ModelState[nameof(LoginViewModel.Password)]?.Errors.Count > 0 ? "is-invalid" : "")" 
-                               placeholder="Enter your password" required />
+                        <label asp-for="Password" class="form-label">Password</label>
+                        <input asp-for="Password" 
+                               type="password" 
+                               class="form-control @(ViewData.ModelState.ContainsKey(nameof(LoginViewModel.Password)) && ViewData.ModelState[nameof(LoginViewModel.Password)]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                               placeholder="Enter your password" 
+                               required />
                         <span asp-validation-for="Password" class="error-text"></span>
                     </div>
 
-                    <div class="mb-3 form-check">
-                        <input asp-for="RememberMe" class="form-check-input" />
-                        <label asp-for="RememberMe" class="form-check-label">Remember me</label>
+                    <div class="mb-4 form-check">
+                        <input asp-for="RememberMe" class="form-check-input" id="rememberMe" />
+                        <label asp-for="RememberMe" class="form-check-label" for="rememberMe">Keep me logged in</label>
                     </div>
 
-                    <button type="submit" class="btn btn-login w-100 text-white">Sign In</button>
+                    <button type="submit" class="btn btn-login w-100">Sign In</button>
                 </form>
 
-                <hr />
+                <div class="divider"></div>
 
                 <div class="footer-text">
-                    <p>© 2024 Claim Submission System<br/>All rights reserved</p>
+                    <p>© 2026 Claim Submission System<br/>All rights reserved</p>
                 </div>
             </div>
         </div>

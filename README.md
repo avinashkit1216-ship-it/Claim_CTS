@@ -101,6 +101,7 @@ ClaimSubmissionSystem/
 ## Features
 
 - ✅ **Secure Login** with credential-based authentication
+- ✅ **User Registration** with comprehensive validation and password strength indicator
 - ✅ **Claims Listing** with pagination (10,000+ records in <5 seconds)
 - ✅ **Advanced Search & Filtering** (by claim #, patient, provider, status)
 - ✅ **Server-side Sorting** by any column
@@ -154,6 +155,7 @@ Access app at: https://localhost:7205
 ```
 Authentication:
 POST   /api/auth/login              - Login with credentials
+POST   /api/auth/register           - Register new user account
 
 Claims Management:
 GET    /api/claims                  - Get paginated claims
@@ -194,6 +196,26 @@ DELETE /api/claims/{id}             - Delete claim
 - Remember me checkbox
 - Error message display
 - Form validation
+
+### User Registration Page (`/Authentication/Register`)
+- Comprehensive registration form with multiple sections
+- **Personal Information**: Full Name, Email, Phone Number, Date of Birth, Gender, Country/Region, Referral Code
+- **Account Credentials**: Username (optional), Password with strength indicator, Confirm Password
+- **Security Features**:
+  - Password visibility toggle (eye icon)
+  - Real-time password strength indicator (Weak/Fair/Strong)
+  - Password confirmation validation
+  - Email validation
+- **Consent & Agreements**: 
+  - Terms & Conditions checkbox
+  - Privacy Policy checkbox
+  - Marketing emails opt-in
+- **User Experience**:
+  - Real-time field validation with visual feedback (green for valid, red for invalid)
+  - Clear error messages for each field
+  - Smooth form scrolling for long registrations
+  - Success redirect to login page
+  - Professional dark theme matching Login page
 
 ### Claims Listing (`/Claim/Index`)
 - Table with columns: Claim #, Patient, Provider, Date, Amount, Status
@@ -267,19 +289,22 @@ DELETE /api/claims/{id}             - Delete claim
 ## Folder Structure Details
 
 ### API Controllers
-- `AuthController.cs` - Handles user login
+- `AuthController.cs` - Handles user login and registration
 - `ClaimsController.cs` - Handles claim CRUD operations
 
 ### Web Models
-- `ClaimModel.cs` - Multiple view models for different scenarios
-- `ErrorViewModel.cs` - Error page model
+- `ClaimModel.cs` - Multiple view models:
+  - `LoginViewModel` - User login form
+  - `RegisterViewModel` - User registration form with comprehensive fields
+  - Others for claim management
 
 ### Web Views
 - `Authentication/Login.cshtml` - Secure login interface
+- `Authentication/Register.cshtml` - Comprehensive user registration form
 - `Claim/Index.cshtml` - Claims listing with pagination
 - `Claim/Create.cshtml` - Add new claim form
 - `Claim/Edit.cshtml` - Edit claim form
-- `Shared/ layouts and shared components
+- `Shared/` - Layouts and shared components
 
 ### Database Scripts
 - `CreateDataBase.sql` - Tables: Users, Claims with indexes

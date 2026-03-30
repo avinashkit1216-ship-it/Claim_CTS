@@ -22,7 +22,6 @@
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/scopedcss/Views/Shared/_Layout.cshtml.rz.scp.css
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/scopedcss/bundle/ClaimSubmission.Web.styles.css
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/scopedcss/projectbundle/ClaimSubmission.Web.bundle.scp.css
-/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/hnpc62bd0u-{0}-lugek5hnai-lugek5hnai.gz
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/xfdo2th66w-{0}-61n19gt1b8-61n19gt1b8.gz
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/yxkwwkm0zn-{0}-fr7q2aak1r-fr7q2aak1r.gz
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/0zxw4oj9lx-{0}-bqjiyaj88i-bqjiyaj88i.gz
@@ -84,8 +83,6 @@
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/7cxrzo6uw8-{0}-muycvpuwrr-muycvpuwrr.gz
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/z2h3519we7-{0}-87fc7y1x7t-87fc7y1x7t.gz
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/4esjtln0ah-{0}-jfsiqqwiad-jfsiqqwiad.gz
-/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/6rr5jbal07-{0}-mu0hr4573q-mu0hr4573q.gz
-/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/8tmfdd8sjy-{0}-mu0hr4573q-mu0hr4573q.gz
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/staticwebassets.build.json
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/staticwebassets.build.json.cache
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/staticwebassets.development.json
@@ -97,3 +94,7 @@
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/ClaimSubmission.Web.genruntimeconfig.cache
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/ref/ClaimSubmission.Web.dll
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/bin/Debug/net10.0/appsettings.Production.json
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/b2m5iz5omc-{0}-e3c2x9e71w-e3c2x9e71w.gz
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/hnpc62bd0u-{0}-0rn1fj2m0v-0rn1fj2m0v.gz
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/6rr5jbal07-{0}-zbf3dhga3d-zbf3dhga3d.gz
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/8tmfdd8sjy-{0}-zbf3dhga3d-zbf3dhga3d.gz

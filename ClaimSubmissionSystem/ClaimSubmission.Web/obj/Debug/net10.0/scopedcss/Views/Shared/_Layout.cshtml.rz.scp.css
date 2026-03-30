@@ -1,42 +1,87 @@
 /* Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
 for details on configuring this project to bundle and minify static web assets. */
 
+/* Dark Theme - Layout Specific Styles */
+
 a.navbar-brand[b-scstvv9tk2] {
   white-space: normal;
   text-align: center;
   word-break: break-all;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #3b82f6 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+}
+
+a.navbar-brand:hover[b-scstvv9tk2] {
+  color: #14b8a6 !important;
+  transform: scale(1.02);
 }
 
 a[b-scstvv9tk2] {
-  color: #0077cc;
+  color: #3b82f6;
+  transition: color 0.2s ease;
+}
+
+a:hover[b-scstvv9tk2] {
+  color: #14b8a6;
 }
 
 .btn-primary[b-scstvv9tk2] {
   color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-.nav-pills .nav-link.active[b-scstvv9tk2], .nav-pills .show > .nav-link[b-scstvv9tk2] {
+.btn-primary:hover[b-scstvv9tk2] {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.5);
+}
+
+.btn-primary:active[b-scstvv9tk2] {
+  background-color: #1e40af;
+  border-color: #1e40af;
+}
+
+.nav-pills .nav-link.active[b-scstvv9tk2], 
+.nav-pills .show > .nav-link[b-scstvv9tk2] {
   color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+  background-color: #3b82f6;
+  border-color: #3b82f6;
 }
 
 .border-top[b-scstvv9tk2] {
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid #334155;
 }
+
 .border-bottom[b-scstvv9tk2] {
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid #334155;
 }
 
 .box-shadow[b-scstvv9tk2] {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .3);
 }
 
 button.accept-policy[b-scstvv9tk2] {
   font-size: 1rem;
   line-height: inherit;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+button.accept-policy:hover[b-scstvv9tk2] {
+  background-color: #2563eb;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .footer[b-scstvv9tk2] {
@@ -45,4 +90,16 @@ button.accept-policy[b-scstvv9tk2] {
   width: 100%;
   white-space: nowrap;
   line-height: 60px;
+  background-color: #1a202c;
+  border-top: 1px solid #334155;
+  color: #cbd5e1;
+}
+
+.footer a[b-scstvv9tk2] {
+  color: #3b82f6;
+}
+
+.footer a:hover[b-scstvv9tk2] {
+  color: #14b8a6;
+  text-decoration: underline;
 }

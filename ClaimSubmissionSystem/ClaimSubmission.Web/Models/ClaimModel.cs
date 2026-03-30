@@ -132,6 +132,71 @@ namespace ClaimSubmission.Web.Models
     }
 
     /// <summary>
+    /// View model for user registration
+    /// </summary>
+    public class RegisterViewModel
+    {
+        [Required(ErrorMessage = "Full Name is mandatory")]
+        [StringLength(100, ErrorMessage = "Full Name cannot be longer than 100 characters")]
+        [Display(Name = "Full Name")]
+        public string? FullName { get; set; }
+
+        [Required(ErrorMessage = "Email Address is mandatory")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
+        [StringLength(100, ErrorMessage = "Email cannot be longer than 100 characters")]
+        [Display(Name = "Email Address")]
+        public string? Email { get; set; }
+
+        [Phone(ErrorMessage = "Invalid phone number")]
+        [StringLength(20, ErrorMessage = "Phone Number cannot be longer than 20 characters")]
+        [Display(Name = "Phone Number")]
+        public string? PhoneNumber { get; set; }
+
+        [StringLength(50, ErrorMessage = "Username cannot be longer than 50 characters")]
+        [Display(Name = "Username")]
+        public string? Username { get; set; }
+
+        [Required(ErrorMessage = "Password is mandatory")]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be between 8 and 100 characters")]
+        [DataType(DataType.Password)]
+        [Display(Name = "Password")]
+        public string? Password { get; set; }
+
+        [Required(ErrorMessage = "Confirm Password is mandatory")]
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirm Password")]
+        [Compare("Password", ErrorMessage = "Passwords do not match")]
+        public string? ConfirmPassword { get; set; }
+
+        [DataType(DataType.Date)]
+        [Display(Name = "Date of Birth")]
+        public DateTime? DateOfBirth { get; set; }
+
+        [StringLength(50, ErrorMessage = "Gender cannot be longer than 50 characters")]
+        [Display(Name = "Gender")]
+        public string? Gender { get; set; }
+
+        [StringLength(50, ErrorMessage = "Country/Region cannot be longer than 50 characters")]
+        [Display(Name = "Country/Region")]
+        public string? Country { get; set; }
+
+        [StringLength(100, ErrorMessage = "Referral Code cannot be longer than 100 characters")]
+        [Display(Name = "Referral Code")]
+        public string? ReferralCode { get; set; }
+
+        [Required(ErrorMessage = "You must accept the Terms & Conditions")]
+        [Display(Name = "I accept the Terms & Conditions")]
+        public bool AcceptTermsAndConditions { get; set; }
+
+        [Required(ErrorMessage = "You must accept the Privacy Policy")]
+        [Display(Name = "I accept the Privacy Policy")]
+        public bool AcceptPrivacyPolicy { get; set; }
+
+        [Display(Name = "I accept marketing emails")]
+        public bool AcceptMarketingEmails { get; set; }
+    }
+
+    /// <summary>
     /// Add Claim View Model (legacy, maintained for backward compatibility)
     /// </summary>
     public class AddClaimViewModel

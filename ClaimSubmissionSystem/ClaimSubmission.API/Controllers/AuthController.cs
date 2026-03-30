@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Data.SqlClient;
 using ClaimSubmission.API.DTOs;
 using ClaimSubmission.API.Services;
 using ClaimSubmission.API.Data;
@@ -40,7 +39,7 @@ namespace ClaimSubmission.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             try
@@ -61,23 +60,11 @@ namespace ClaimSubmission.API.Controllers
                 {
                     user = await _authRepository.ValidateCredentialsAsync(request.Username, request.Password);
                 }
-                catch (SqlException sqlEx)
+                catch (Exception ex)
                 {
-                    _logger.LogError(sqlEx, $"SQL Server connection error during credential validation for user '{request.Username}': {sqlEx.Message}");
-                    return StatusCode(StatusCodes.Status503ServiceUnavailable, 
-                        new { error = "Database service unavailable", details = "Unable to connect to database. Please try again later." });
-                }
-                catch (Exception dbEx)
-                {
-                    _logger.LogError(dbEx, $"Database error during credential validation for user '{request.Username}': {dbEx.GetType().Name} - {dbEx.Message}");
-                    // Check if it's a connection-related error
-                    if (IsConnectionError(dbEx))
-                    {
-                        return StatusCode(StatusCodes.Status503ServiceUnavailable, 
-                            new { error = "Database service unavailable", details = "Unable to reach database. Please try again later." });
-                    }
+                    _logger.LogError(ex, $"Error during credential validation for user '{request.Username}': {ex.GetType().Name} - {ex.Message}");
                     return StatusCode(StatusCodes.Status500InternalServerError, 
-                        new { error = "Database error occurred", details = "An error occurred while processing your request." });
+                        new { error = "An error occurred during authentication", details = "Please try again later." });
                 }
                 
                 if (user == null)
@@ -139,24 +126,6 @@ namespace ClaimSubmission.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, 
                     new { error = "An error occurred during login" });
             }
-        }
-
-        /// <summary>
-        /// Helper method to determine if an exception is connection-related
-        /// </summary>
-        private bool IsConnectionError(Exception ex)
-        {
-            var message = ex.Message?.ToLower() ?? "";
-            var innerExceptionMessage = ex.InnerException?.Message?.ToLower() ?? "";
-            var combinedMessage = message + " " + innerExceptionMessage;
-
-            return combinedMessage.Contains("connection") || 
-                   combinedMessage.Contains("timeout") || 
-                   combinedMessage.Contains("server") ||
-                   combinedMessage.Contains("network") ||
-                   combinedMessage.Contains("unavailable") ||
-                   combinedMessage.Contains("connect") ||
-                   combinedMessage.Contains("tcp");
         }
     }
 }

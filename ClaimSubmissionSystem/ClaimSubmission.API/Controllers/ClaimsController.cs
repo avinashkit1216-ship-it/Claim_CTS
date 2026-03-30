@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Data.SqlClient;
 using ClaimSubmission.API.Data;
 using ClaimSubmission.API.DTOs;
 
@@ -27,7 +26,6 @@ namespace ClaimSubmission.API.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetClaims([FromQuery] GetClaimsRequest request)
         {
@@ -41,20 +39,9 @@ namespace ClaimSubmission.API.Controllers
                 var result = await _repository.GetClaimsAsync(request);
                 return Ok(new { data = result, message = "Claims retrieved successfully" });
             }
-            catch (SqlException sqlEx)
-            {
-                _logger.LogError(sqlEx, "SQL Server error retrieving claims");
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    new { error = "Database service unavailable" });
-            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error retrieving claims: {ex.GetType().Name}");
-                if (IsConnectionError(ex))
-                {
-                    return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                        new { error = "Database service unavailable" });
-                }
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new { error = "An error occurred while retrieving claims" });
             }
@@ -66,7 +53,6 @@ namespace ClaimSubmission.API.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetClaimById(int id)
         {
@@ -97,20 +83,9 @@ namespace ClaimSubmission.API.Controllers
 
                 return Ok(new { data = claimResponse, message = "Claim retrieved successfully" });
             }
-            catch (SqlException sqlEx)
-            {
-                _logger.LogError(sqlEx, $"SQL Server error retrieving claim {id}");
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    new { error = "Database service unavailable" });
-            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error retrieving claim {id}: {ex.GetType().Name}");
-                if (IsConnectionError(ex))
-                {
-                    return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                        new { error = "Database service unavailable" });
-                }
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new { error = "An error occurred while retrieving the claim" });
             }
@@ -122,7 +97,6 @@ namespace ClaimSubmission.API.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateClaim([FromBody] CreateClaimRequest request)
         {
@@ -149,20 +123,9 @@ namespace ClaimSubmission.API.Controllers
                     message = "Claim created successfully" 
                 });
             }
-            catch (SqlException sqlEx)
-            {
-                _logger.LogError(sqlEx, "SQL Server error creating claim");
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    new { error = "Database service unavailable" });
-            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error creating claim: {ex.GetType().Name}");
-                if (IsConnectionError(ex))
-                {
-                    return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                        new { error = "Database service unavailable" });
-                }
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new { error = "An error occurred while creating the claim" });
             }
@@ -175,7 +138,6 @@ namespace ClaimSubmission.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateClaim(int id, [FromBody] UpdateClaimRequest request)
         {
@@ -211,20 +173,9 @@ namespace ClaimSubmission.API.Controllers
                 await _repository.UpdateClaimAsync(id, request, userId);
                 return Ok(new { message = "Claim updated successfully" });
             }
-            catch (SqlException sqlEx)
-            {
-                _logger.LogError(sqlEx, $"SQL Server error updating claim {id}");
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    new { error = "Database service unavailable" });
-            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error updating claim {id}: {ex.GetType().Name}");
-                if (IsConnectionError(ex))
-                {
-                    return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                        new { error = "Database service unavailable" });
-                }
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new { error = "An error occurred while updating the claim" });
             }
@@ -237,7 +188,6 @@ namespace ClaimSubmission.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteClaim(int id)
         {
@@ -258,20 +208,9 @@ namespace ClaimSubmission.API.Controllers
                 await _repository.DeleteClaimAsync(id);
                 return Ok(new { message = "Claim deleted successfully" });
             }
-            catch (SqlException sqlEx)
-            {
-                _logger.LogError(sqlEx, $"SQL Server error deleting claim {id}");
-                return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                    new { error = "Database service unavailable" });
-            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error deleting claim {id}: {ex.GetType().Name}");
-                if (IsConnectionError(ex))
-                {
-                    return StatusCode(StatusCodes.Status503ServiceUnavailable,
-                        new { error = "Database service unavailable" });
-                }
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new { error = "An error occurred while deleting the claim" });
             }
@@ -319,24 +258,6 @@ namespace ClaimSubmission.API.Controllers
                 errors.Add("Claim Status is mandatory");
 
             return errors;
-        }
-
-        /// <summary>
-        /// Helper method to determine if an exception is connection-related
-        /// </summary>
-        private bool IsConnectionError(Exception ex)
-        {
-            var message = ex.Message?.ToLower() ?? "";
-            var innerExceptionMessage = ex.InnerException?.Message?.ToLower() ?? "";
-            var combinedMessage = message + " " + innerExceptionMessage;
-
-            return combinedMessage.Contains("connection") || 
-                   combinedMessage.Contains("timeout") || 
-                   combinedMessage.Contains("server") ||
-                   combinedMessage.Contains("network") ||
-                   combinedMessage.Contains("unavailable") ||
-                   combinedMessage.Contains("connect") ||
-                   combinedMessage.Contains("tcp");
         }
     }
 }

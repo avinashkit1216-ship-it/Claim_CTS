@@ -1,0 +1,816 @@
+@model ClaimSubmission.Web.Models.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Register";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Claim Submission System</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dark-theme.css" asp-append-version="true" />
+    <style>
+        html, body {
+            height: 100%;
+            background: linear-gradient(135deg, #0f172a 0%, #1a202c 50%, #2d3748 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 20px 0;
+        }
+
+        /* Animated Background Elements */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            top: -50%;
+            right: -10%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 15s ease-in-out infinite;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            bottom: -20%;
+            left: -5%;
+            background: radial-gradient(circle, rgba(20, 184, 166, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 20s ease-in-out infinite reverse;
+        }
+
+        @@keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(20px);
+            }
+        }
+
+        .register-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 550px;
+            padding: 20px;
+        }
+
+        .register-card {
+            background-color: rgba(26, 32, 44, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .register-card:hover {
+            box-shadow: 0 30px 80px rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .register-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%);
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .register-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        .register-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: white;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .register-header p {
+            font-size: 14px;
+            margin: 0;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+
+        .register-body {
+            padding: 40px 30px;
+            background-color: #0f172a;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .register-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .register-body::-webkit-scrollbar-track {
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 4px;
+        }
+
+        .register-body::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.4);
+            border-radius: 4px;
+        }
+
+        .register-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.6);
+        }
+
+        .form-control,
+        .form-select {
+            background-color: rgba(45, 55, 72, 0.6);
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            color: #f1f5f9;
+            padding: 12px 16px;
+            font-size: 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control::placeholder {
+            color: #94a3b8;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background-color: rgba(45, 55, 72, 0.8);
+            border-color: #3b82f6;
+            color: #f1f5f9;
+            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+            outline: none;
+        }
+
+        .form-control.is-invalid,
+        .form-select.is-invalid {
+            border-color: #ef4444;
+            background-image: none;
+        }
+
+        .form-control.is-invalid:focus,
+        .form-select.is-invalid:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 0.25rem rgba(239, 68, 68, 0.25);
+        }
+
+        .form-control.is-valid,
+        .form-select.is-valid {
+            border-color: #10b981;
+            background-image: none;
+        }
+
+        .form-control.is-valid:focus,
+        .form-select.is-valid:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.25);
+        }
+
+        .form-label {
+            color: #3b82f6;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-check-input {
+            width: 20px;
+            height: 20px;
+            margin-top: 3px;
+            accent-color: #3b82f6;
+            background-color: rgba(45, 55, 72, 0.6);
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            cursor: pointer;
+        }
+
+        .form-check-input:focus {
+            background-color: rgba(45, 55, 72, 0.8);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+        }
+
+        .form-check-input:checked {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .form-check-label {
+            color: #cbd5e1;
+            margin-left: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .form-check-label a {
+            color: #3b82f6;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .form-check-label a:hover {
+            color: #14b8a6;
+            text-decoration: underline;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .password-strength-container {
+            margin-top: 8px;
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .password-strength-bar {
+            flex: 1;
+            height: 4px;
+            background-color: rgba(59, 130, 246, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .password-strength-indicator {
+            height: 100%;
+            width: 0%;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .password-strength-indicator.weak {
+            background-color: #ef4444;
+            width: 33%;
+        }
+
+        .password-strength-indicator.fair {
+            background-color: #f59e0b;
+            width: 66%;
+        }
+
+        .password-strength-indicator.strong {
+            background-color: #10b981;
+            width: 100%;
+        }
+
+        .password-strength-text {
+            font-size: 12px;
+            color: #94a3b8;
+            min-width: 60px;
+        }
+
+        .password-strength-text.weak {
+            color: #ef4444;
+        }
+
+        .password-strength-text.fair {
+            color: #f59e0b;
+        }
+
+        .password-strength-text.strong {
+            color: #10b981;
+        }
+
+        .password-toggle {
+            position: relative;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #3b82f6;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+            transition: color 0.2s ease;
+            z-index: 10;
+        }
+
+        .password-toggle-btn:hover {
+            color: #14b8a6;
+        }
+
+        .btn-register {
+            background: linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%);
+            border: none;
+            color: white;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .btn-register::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-register:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-register:active {
+            transform: translateY(0);
+        }
+
+        .btn-register:disabled {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid;
+            font-weight: 500;
+        }
+
+        .alert-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #fecaca;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .alert-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #fcd34d;
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .alert-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #86efac;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .error-text {
+            color: #fca5a5;
+            font-size: 13px;
+            margin-top: 5px;
+            display: block;
+            font-weight: 500;
+        }
+
+        .divider {
+            background: linear-gradient(90deg, transparent, #334155, transparent);
+            height: 1px;
+            margin: 25px 0;
+        }
+
+        .section-title {
+            font-size: 13px;
+            color: #14b8a6;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+        }
+
+        .section-title:first-child {
+            margin-top: 0;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 20px;
+            color: #94a3b8;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .footer-text a {
+            color: #3b82f6;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-text a:hover {
+            color: #14b8a6;
+            text-decoration: underline;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        /* Success Message */
+        .success-icon {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 576px) {
+            .register-header {
+                padding: 30px 20px;
+            }
+
+            .register-header h1 {
+                font-size: 24px;
+            }
+
+            .register-body {
+                padding: 30px 20px;
+            }
+
+            .register-wrapper {
+                padding: 10px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .form-row.full {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-wrapper">
+        <div class="register-card">
+            <div class="register-header">
+                <h1>Create an Account</h1>
+                <p>Join Claim Submission System</p>
+            </div>
+            <div class="register-body">
+                @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>⚠️ Registration Failed!</strong>
+                        <div style="margin-top: 8px;">
+                            @Html.ValidationSummary(false)
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="filter: invert(1) grayscale(0) brightness(1.8);"></button>
+                    </div>
+                }
+
+                <form method="post" asp-action="Register" asp-controller="Authentication">
+                    @Html.AntiForgeryToken()
+
+                    <!-- Personal Information Section -->
+                    <h6 class="section-title">Personal Information</h6>
+
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label">Full Name *</label>
+                        <input asp-for="FullName" 
+                               class="form-control @(ViewData.ModelState.ContainsKey(nameof(RegisterViewModel.FullName)) && ViewData.ModelState[nameof(RegisterViewModel.FullName)]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                               placeholder="Enter your full name" 
+                               required 
+                               autofocus />
+                        <span asp-validation-for="FullName" class="error-text"></span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">Email Address *</label>
+                            <input asp-for="Email" 
+                                   type="email"
+                                   class="form-control @(ViewData.ModelState.ContainsKey(nameof(RegisterViewModel.Email)) && ViewData.ModelState[nameof(RegisterViewModel.Email)]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                                   placeholder="your.email@example.com" 
+                                   required />
+                            <span asp-validation-for="Email" class="error-text"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                            <input asp-for="PhoneNumber" 
+                                   type="tel"
+                                   class="form-control @(ViewData.ModelState.ContainsKey(nameof(RegisterViewModel.PhoneNumber)) && ViewData.ModelState[nameof(RegisterViewModel.PhoneNumber)]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                                   placeholder="+1 (555) 000-0000" />
+                            <span asp-validation-for="PhoneNumber" class="error-text"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="mb-3">
+                            <label asp-for="DateOfBirth" class="form-label">Date of Birth</label>
+                            <input asp-for="DateOfBirth" 
+                                   type="date"
+                                   class="form-control @(ViewData.ModelState.ContainsKey(nameof(RegisterViewModel.DateOfBirth)) && ViewData.ModelState[nameof(RegisterViewModel.DateOfBirth)]?.Errors.Count > 0 ? "is-invalid" : "")" />
+                            <span asp-validation-for="DateOfBirth" class="error-text"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Gender" class="form-label">Gender</label>
+                            <select asp-for="Gender" class="form-select">
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                                <option value="Prefer not to say">Prefer not to say</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="mb-3">
+                            <label asp-for="Country" class="form-label">Country/Region</label>
+                            <input asp-for="Country" 
+                                   class="form-control @(ViewData.ModelState.ContainsKey(nameof(RegisterViewModel.Country)) && ViewData.ModelState[nameof(RegisterViewModel.Country)]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                                   placeholder="Select your country" />
+                            <span asp-validation-for="Country" class="error-text"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ReferralCode" class="form-label">Referral Code</label>
+                            <input asp-for="ReferralCode" 
+                                   class="form-control @(ViewData.ModelState.ContainsKey(nameof(RegisterViewModel.ReferralCode)) && ViewData.ModelState[nameof(RegisterViewModel.ReferralCode)]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                                   placeholder="If you have one" />
+                            <span asp-validation-for="ReferralCode" class="error-text"></span>
+                        </div>
+                    </div>
+
+                    <!-- Account Credentials Section -->
+                    <h6 class="section-title">Account Credentials</h6>
+
+                    <div class="mb-3">
+                        <label asp-for="Username" class="form-label">Username</label>
+                        <input asp-for="Username" 
+                               class="form-control @(ViewData.ModelState.ContainsKey(nameof(RegisterViewModel.Username)) && ViewData.ModelState[nameof(RegisterViewModel.Username)]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                               placeholder="Choose a username (optional)" />
+                        <div class="form-hint">If left blank, your email prefix will be used as your username</div>
+                        <span asp-validation-for="Username" class="error-text"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label">Password *</label>
+                        <div class="password-toggle">
+                            <input asp-for="Password" 
+                                   type="password" 
+                                   class="form-control @(ViewData.ModelState.ContainsKey(nameof(RegisterViewModel.Password)) && ViewData.ModelState[nameof(RegisterViewModel.Password)]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                                   placeholder="Create a strong password" 
+                                   required 
+                                   id="passwordInput"
+                                   data-check-password="true" />
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('passwordInput')" title="Toggle password visibility">
+                                👁️
+                            </button>
+                        </div>
+                        <div class="form-hint">At least 8 characters with uppercase, lowercase, numbers, and symbols</div>
+                        <div class="password-strength-container">
+                            <div class="password-strength-bar">
+                                <div class="password-strength-indicator" id="passwordStrengthBar"></div>
+                            </div>
+                            <span class="password-strength-text" id="passwordStrengthText">-</span>
+                        </div>
+                        <span asp-validation-for="Password" class="error-text"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ConfirmPassword" class="form-label">Confirm Password *</label>
+                        <div class="password-toggle">
+                            <input asp-for="ConfirmPassword" 
+                                   type="password" 
+                                   class="form-control @(ViewData.ModelState.ContainsKey(nameof(RegisterViewModel.ConfirmPassword)) && ViewData.ModelState[nameof(RegisterViewModel.ConfirmPassword)]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                                   placeholder="Confirm your password" 
+                                   required 
+                                   id="confirmPasswordInput" />
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('confirmPasswordInput')" title="Toggle password visibility">
+                                👁️
+                            </button>
+                        </div>
+                        <span asp-validation-for="ConfirmPassword" class="error-text"></span>
+                    </div>
+
+                    <!-- Consent & Policies Section -->
+                    <h6 class="section-title">Consent & Agreements</h6>
+
+                    <div class="mb-3 form-check">
+                        <input asp-for="AcceptTermsAndConditions" 
+                               class="form-check-input @(ViewData.ModelState.ContainsKey(nameof(RegisterViewModel.AcceptTermsAndConditions)) && ViewData.ModelState[nameof(RegisterViewModel.AcceptTermsAndConditions)]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                               id="termsCheckbox" />
+                        <label asp-for="AcceptTermsAndConditions" class="form-check-label" for="termsCheckbox">
+                            I accept the <a href="#" target="_blank">Terms & Conditions</a> *
+                        </label>
+                        <span asp-validation-for="AcceptTermsAndConditions" class="error-text"></span>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input asp-for="AcceptPrivacyPolicy" 
+                               class="form-check-input @(ViewData.ModelState.ContainsKey(nameof(RegisterViewModel.AcceptPrivacyPolicy)) && ViewData.ModelState[nameof(RegisterViewModel.AcceptPrivacyPolicy)]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                               id="privacyCheckbox" />
+                        <label asp-for="AcceptPrivacyPolicy" class="form-check-label" for="privacyCheckbox">
+                            I accept the <a href="#" target="_blank">Privacy Policy</a> *
+                        </label>
+                        <span asp-validation-for="AcceptPrivacyPolicy" class="error-text"></span>
+                    </div>
+
+                    <div class="mb-4 form-check">
+                        <input asp-for="AcceptMarketingEmails" 
+                               class="form-check-input" 
+                               id="marketingCheckbox" />
+                        <label asp-for="AcceptMarketingEmails" class="form-check-label" for="marketingCheckbox">
+                            Send me product updates and promotional offers
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-register" id="registerBtn">Create Account</button>
+                </form>
+
+                <div class="divider"></div>
+
+                <div class="footer-text">
+                    <p>Already have an account? <a href="@Url.Action("Login", "Authentication")">Sign In</a></p>
+                    <p style="margin-top: 12px; font-size: 12px;">
+                        © 2026 Claim Submission System<br/>
+                        All rights reserved
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Password visibility toggle
+        function togglePasswordVisibility(elementId) {
+            const input = document.getElementById(elementId);
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            event.target.textContent = isPassword ? '🙈' : '👁️';
+        }
+
+        // Password strength indicator
+        const passwordInput = document.getElementById('passwordInput');
+        if (passwordInput) {
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                const strength = calculatePasswordStrength(password);
+                updatePasswordStrengthUI(strength);
+            });
+
+            // Check initial password strength on page load
+            if (passwordInput.value) {
+                const strength = calculatePasswordStrength(passwordInput.value);
+                updatePasswordStrengthUI(strength);
+            }
+        }
+
+        function calculatePasswordStrength(password) {
+            let strength = 0;
+
+            // Length check
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+
+            // Character variety checks
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+            return strength;
+        }
+
+        function updatePasswordStrengthUI(strength) {
+            const bar = document.getElementById('passwordStrengthBar');
+            const text = document.getElementById('passwordStrengthText');
+
+            bar.className = 'password-strength-indicator';
+            text.className = 'password-strength-text';
+
+            if (strength < 2) {
+                bar.classList.add('weak');
+                text.classList.add('weak');
+                text.textContent = 'Weak';
+            } else if (strength < 4) {
+                bar.classList.add('fair');
+                text.classList.add('fair');
+                text.textContent = 'Fair';
+            } else {
+                bar.classList.add('strong');
+                text.classList.add('strong');
+                text.textContent = 'Strong';
+            }
+        }
+
+        // Form submission handling
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function() {
+                const registerBtn = document.getElementById('registerBtn');
+                registerBtn.disabled = true;
+                registerBtn.textContent = 'Creating Account...';
+            });
+        }
+
+        // Real-time validation feedback
+        const inputs = document.querySelectorAll('.form-control, .form-select');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value && this.validity.valid) {
+                    this.classList.add('is-valid');
+                    this.classList.remove('is-invalid');
+                } else if (this.value && !this.validity.valid) {
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                }
+            });
+
+            input.addEventListener('input', function() {
+                if (this.classList.contains('is-invalid') && this.value && this.validity.valid) {
+                    this.classList.remove('is-invalid');
+                }
+            });
+        });
+
+        // Confirm password validation
+        const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+        if (confirmPasswordInput && passwordInput) {
+            confirmPasswordInput.addEventListener('blur', function() {
+                if (this.value && this.value !== passwordInput.value) {
+                    this.classList.add('is-invalid');
+                } else if (this.value === passwordInput.value) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+            });
+
+            passwordInput.addEventListener('input', function() {
+                if (confirmPasswordInput.value && confirmPasswordInput.value !== this.value) {
+                    confirmPasswordInput.classList.add('is-invalid');
+                } else if (confirmPasswordInput.value === this.value) {
+                    confirmPasswordInput.classList.remove('is-invalid');
+                    confirmPasswordInput.classList.add('is-valid');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

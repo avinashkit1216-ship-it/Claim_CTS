@@ -1,0 +1,67 @@
+[
+  {
+    "ClaimId": 3,
+    "ClaimNumber": "CLM-2024-003",
+    "PatientName": "Michael Johnson",
+    "ProviderName": "Wellness Clinic",
+    "DateOfService": "2026-03-28T05:33:59.1809994Z",
+    "ClaimAmount": 750.00,
+    "ClaimStatus": "Pending",
+    "CreatedBy": 2,
+    "CreatedDate": "2026-03-28T05:33:59.1809995Z",
+    "LastModifiedBy": null,
+    "LastModifiedDate": null
+  },
+  {
+    "ClaimId": 4,
+    "ClaimNumber": "CLM-0001",
+    "PatientName": "AVINASH K",
+    "ProviderName": "APOLLO",
+    "DateOfService": "0001-01-24T00:00:00",
+    "ClaimAmount": 900,
+    "ClaimStatus": "Pending",
+    "CreatedBy": 1,
+    "CreatedDate": "2026-03-30T05:40:19.8143804Z",
+    "LastModifiedBy": null,
+    "LastModifiedDate": null
+  },
+  {
+    "ClaimId": 5,
+    "ClaimNumber": "CLM-004",
+    "PatientName": "ERLINA ",
+    "ProviderName": "APOLLO",
+    "DateOfService": "2005-04-10T00:00:00",
+    "ClaimAmount": 1000,
+    "ClaimStatus": "Processing",
+    "CreatedBy": 1,
+    "CreatedDate": "2026-03-30T07:37:06.9937368Z",
+    "LastModifiedBy": null,
+    "LastModifiedDate": null
+  },
+  {
+    "ClaimId": 6,
+    "ClaimNumber": "CLM-0005",
+    "PatientName": "UMA MAGESHWARI K",
+    "ProviderName": "APOLLO",
+    "DateOfService": "2005-10-01T00:00:00",
+    "ClaimAmount": 1000,
+    "ClaimStatus": "Approved",
+    "CreatedBy": 1,
+    "CreatedDate": "2026-03-30T09:34:32.4151992Z",
+    "LastModifiedBy": null,
+    "LastModifiedDate": null
+  },
+  {
+    "ClaimId": 7,
+    "ClaimNumber": "CLM-0005",
+    "PatientName": "HEMA CHANDRIKA ",
+    "ProviderName": "APOLLO",
+    "DateOfService": "2005-03-03T00:00:00",
+    "ClaimAmount": 1000,
+    "ClaimStatus": "Approved",
+    "CreatedBy": 1,
+    "CreatedDate": "2026-03-30T09:35:32.4040302Z",
+    "LastModifiedBy": null,
+    "LastModifiedDate": null
+  }
+]

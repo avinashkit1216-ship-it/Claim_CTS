@@ -23,6 +23,59 @@ namespace ClaimSubmission.Web.Controllers
         }
 
         /// <summary>
+        /// Display paginated list of claims with filtering (alias for Index)
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> List(int pageNumber = 1, int pageSize = 20, 
+            string? searchTerm = null, string? claimStatus = null, 
+            string? sortBy = "CreatedDate", string? sortDirection = "DESC")
+        {
+            try
+            {
+                if (!IsUserAuthenticated())
+                    return RedirectToAction("Login", "Authentication");
+
+                // Ensure page parameters are valid
+                if (pageNumber <= 0) pageNumber = 1;
+                if (pageSize <= 0) pageSize = 20;
+
+                string token = GetUserToken();
+                
+                var claims = await _claimApiService.GetClaimsAsync(token, pageNumber, pageSize, 
+                    searchTerm, claimStatus, sortBy, sortDirection);
+
+                if (claims == null)
+                {
+                    claims = new ClaimsPaginatedListViewModel 
+                    { 
+                        Claims = new List<ClaimViewListModel>(),
+                        PageNumber = pageNumber,
+                        PageSize = pageSize
+                    };
+                    ViewBag.Message = "No claims found.";
+                }
+
+                return View(claims);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                _logger.LogWarning("Unauthorized access attempt");
+                return RedirectToAction("Login", "Authentication");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading claims");
+                ViewBag.Error = "An error occurred while loading claims. Please try again.";
+                return View(new ClaimsPaginatedListViewModel 
+                { 
+                    Claims = new List<ClaimViewListModel>(),
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                });
+            }
+        }
+
+        /// <summary>
         /// Display paginated list of claims with filtering
         /// </summary>
         public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 20, 
@@ -72,6 +125,69 @@ namespace ClaimSubmission.Web.Controllers
                     PageSize = pageSize
                 });
             }
+        }
+
+        /// <summary>
+        /// Display add claim page (alias for Create)
+        /// </summary>
+        [HttpGet]
+        public IActionResult Add()
+        {
+            if (!IsUserAuthenticated())
+                return RedirectToAction("Login", "Authentication");
+
+            return View(new AddClaimViewModel());
+        }
+
+        /// <summary>
+        /// Handle claim addition (alias for Create)
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Add(AddClaimViewModel model)
+        {
+            if (!IsUserAuthenticated())
+                return RedirectToAction("Login", "Authentication");
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            try
+            {
+                string token = GetUserToken();
+                // Convert AddClaimViewModel to CreateClaimViewModel for API call
+                var createModel = new CreateClaimViewModel
+                {
+                    ClaimNumber = model.ClaimNumber,
+                    PatientName = model.PatientName,
+                    ProviderName = model.ProviderName,
+                    DateOfService = model.DateOfService,
+                    ClaimAmount = model.ClaimAmount,
+                    ClaimStatus = model.ClaimStatus
+                };
+
+                int claimId = await _claimApiService.CreateClaimAsync(token, createModel);
+
+                if (claimId > 0)
+                {
+                    _logger.LogInformation($"Claim created successfully - ID: {claimId}");
+                    TempData["SuccessMessage"] = "Claim created successfully";
+                    return RedirectToAction(nameof(List));
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Failed to create claim");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating claim");
+                ModelState.AddModelError(string.Empty, $"Error creating claim: {ex.Message}");
+            }
+
+            return View(model);
         }
 
         /// <summary>

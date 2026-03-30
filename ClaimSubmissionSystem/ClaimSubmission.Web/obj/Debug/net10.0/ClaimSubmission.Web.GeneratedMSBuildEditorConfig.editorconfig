@@ -26,6 +26,10 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXV0aGVudGljYXRpb24vTG9naW4uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/Views/Authentication/Register.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXV0aGVudGljYXRpb24vUmVnaXN0ZXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/Views/Claim/Add.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2xhaW0vQWRkLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 

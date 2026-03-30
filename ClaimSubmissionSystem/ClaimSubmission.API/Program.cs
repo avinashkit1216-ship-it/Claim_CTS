@@ -1,4 +1,5 @@
 using ClaimSubmission.API.Data;
+using ClaimSubmission.API.Data.LocalStorage;
 using ClaimSubmission.API.Services;
 using ClaimSubmission.API.Middleware;
 
@@ -10,9 +11,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add repository services
-builder.Services.AddScoped<IClaimsRepository, ClaimsRepository>();
-builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+// Add local storage service
+builder.Services.AddSingleton<LocalStorageService>();
+
+// Add repository services - using local storage implementations
+builder.Services.AddScoped<IClaimsRepository, LocalClaimsRepository>();
+builder.Services.AddScoped<IAuthRepository, LocalAuthRepository>();
 
 // Add business services
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -42,7 +46,7 @@ if (app.Environment.IsDevelopment())
     try
     {
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
-        logger.LogInformation("Initializing database seeding...");
+        logger.LogInformation("Initializing local storage data seeding...");
         await DataSeeder.SeedTestUsersAsync(builder.Configuration, logger);
     }
     catch (Exception ex)
@@ -69,8 +73,8 @@ app.UseCors("AllowWeb");
 app.UseAuthorization();
 
 // Add default root endpoint
-app.MapGet("/", () => "ClaimSubmission API is running. Visit /swagger or /openapi to explore the API.");
-app.MapGet("/health", () => new { status = "healthy", timestamp = DateTime.UtcNow });
+app.MapGet("/", () => "ClaimSubmission API is running (Local Storage Mode). Visit /swagger or /openapi to explore the API.");
+app.MapGet("/health", () => new { status = "healthy", timestamp = DateTime.UtcNow, mode = "local-storage" });
 
 app.MapControllers();
 

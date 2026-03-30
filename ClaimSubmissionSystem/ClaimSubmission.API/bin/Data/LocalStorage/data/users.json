@@ -1,0 +1,22 @@
+[
+  {
+    "UserId": 1,
+    "Username": "admin",
+    "PasswordHash": "$2a$11$2pnDAJ2QG7V6FKB.HTLSR.1ULKFS7uLNPJ46ZugkG0V.Hv05fi29C",
+    "Email": "admin@claimsystem.com",
+    "FullName": "Administrator",
+    "IsActive": true,
+    "CreatedDate": "2026-03-30T05:33:59.1245508Z",
+    "LastLoginDate": "2026-03-30T09:05:14.809272Z"
+  },
+  {
+    "UserId": 2,
+    "Username": "claimmanager",
+    "PasswordHash": "$2a$11$p1nQcCr5ccqOUF7h0n0WaOSCJWd88meRNcHeNngoBB2IdgrhyKUXC",
+    "Email": "manager@claimsystem.com",
+    "FullName": "John Manager",
+    "IsActive": true,
+    "CreatedDate": "2026-03-30T05:33:59.1246372Z",
+    "LastLoginDate": null
+  }
+]
