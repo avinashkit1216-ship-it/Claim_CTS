@@ -25,5 +25,8 @@ namespace ClaimSubmission.API.Data
         Task<User?> ValidateCredentialsAsync(string username, string passwordHash);
         Task<int> CreateUserAsync(string username, string passwordHash, string email, string fullName);
         Task UpdateLastLoginAsync(int userId);
+        Task<bool> EmailExistsAsync(string email);
+        Task<bool> UsernameExistsAsync(string username);
+        Task<User?> GetUserByEmailAsync(string email);
     }
 }

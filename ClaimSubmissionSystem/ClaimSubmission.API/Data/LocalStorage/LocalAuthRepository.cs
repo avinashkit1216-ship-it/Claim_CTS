@@ -137,5 +137,61 @@ namespace ClaimSubmission.API.Data.LocalStorage
                 // Don't throw - this is not critical
             }
         }
+
+        public async Task<bool> EmailExistsAsync(string email)
+        {
+            try
+            {
+                _logger.LogDebug($"Checking if email exists: {email}");
+                var users = await _storageService.ReadAllAsync<User>(USERS_FILE);
+                return users.Any(u => u.Email?.Equals(email, StringComparison.OrdinalIgnoreCase) == true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error checking if email exists: {email}");
+                throw;
+            }
+        }
+
+        public async Task<bool> UsernameExistsAsync(string username)
+        {
+            try
+            {
+                _logger.LogDebug($"Checking if username exists: {username}");
+                var users = await _storageService.ReadAllAsync<User>(USERS_FILE);
+                return users.Any(u => u.Username?.Equals(username, StringComparison.OrdinalIgnoreCase) == true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error checking if username exists: {username}");
+                throw;
+            }
+        }
+
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            try
+            {
+                _logger.LogDebug($"Retrieving user by email: {email}");
+                var users = await _storageService.ReadAllAsync<User>(USERS_FILE);
+                var user = users.FirstOrDefault(u => u.Email?.Equals(email, StringComparison.OrdinalIgnoreCase) == true);
+                
+                if (user != null)
+                {
+                    _logger.LogDebug($"User found for email: {email}");
+                }
+                else
+                {
+                    _logger.LogDebug($"No user found for email: {email}");
+                }
+                
+                return user;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving user by email: {email}");
+                throw;
+            }
+        }
     }
 }

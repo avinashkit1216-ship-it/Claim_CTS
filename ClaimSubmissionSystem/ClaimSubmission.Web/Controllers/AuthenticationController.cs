@@ -126,8 +126,20 @@ namespace ClaimSubmission.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
+            // Check if this is a JSON request (AJAX) or form submission
+            bool isJsonRequest = HttpContext.Request.ContentType?.Contains("application/json") ?? false;
+
             if (!ModelState.IsValid)
             {
+                if (isJsonRequest)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Validation failed",
+                        errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()
+                    });
+                }
                 return View(model);
             }
 
@@ -146,43 +158,138 @@ namespace ClaimSubmission.Web.Controllers
                 {
                     _logger.LogInformation($"User '{model.Email}' registered successfully");
                     
-                    // Redirect to login with success message
-                    TempData["SuccessMessage"] = "Registration successful! Please log in with your credentials.";
-                    return RedirectToAction("Login");
+                    // Store user information in session
+                    HttpContext.Session.SetString("UserId", user.UserId.ToString());
+                    HttpContext.Session.SetString("Username", user.Username ?? string.Empty);
+                    HttpContext.Session.SetString("FullName", user.FullName ?? string.Empty);
+                    HttpContext.Session.SetString("Email", user.Email ?? string.Empty);
+                    HttpContext.Session.SetString("UserToken", user.Token ?? string.Empty);
+                    HttpContext.Session.SetString("IsAuthenticated", "true");
+
+                    if (isJsonRequest)
+                    {
+                        // Return JSON response for AJAX requests
+                        return Json(new
+                        {
+                            success = true,
+                            message = "Registration successful!",
+                            data = user
+                        });
+                    }
+                    else
+                    {
+                        // Redirect to login for form submissions
+                        TempData["SuccessMessage"] = "Registration successful! Please log in with your credentials.";
+                        return RedirectToAction("Login");
+                    }
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Registration failed. Please try again.");
+                    var errorMsg = "Registration failed. Please try again.";
                     _logger.LogWarning($"Failed registration attempt for email '{model.Email}'");
+                    
+                    if (isJsonRequest)
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            message = errorMsg
+                        });
+                    }
+                    
+                    ModelState.AddModelError(string.Empty, errorMsg);
                 }
             }
             catch (InvalidOperationException ioEx)
             {
-                // Handle duplicate email/username
-                ModelState.AddModelError(string.Empty, ioEx.Message);
+                var errorMsg = ioEx.Message;
                 _logger.LogWarning(ioEx, $"Registration validation error for '{model.Email}'");
+                
+                if (isJsonRequest)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = errorMsg
+                    });
+                }
+                
+                ModelState.AddModelError(string.Empty, errorMsg);
             }
             catch (UnauthorizedAccessException)
             {
-                ModelState.AddModelError(string.Empty, "Registration is currently unavailable. Please try again later.");
+                var errorMsg = "Registration is currently unavailable. Please try again later.";
                 _logger.LogWarning($"Unauthorized access during registration for '{model.Email}'");
+                
+                if (isJsonRequest)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = errorMsg
+                    });
+                }
+                
+                ModelState.AddModelError(string.Empty, errorMsg);
             }
             catch (HttpRequestException hEx) when (hEx.InnerException is TimeoutException || 
                                                      hEx.Message.Contains("unavailable") ||
                                                      hEx.Message.Contains("connection"))
             {
-                ModelState.AddModelError(string.Empty, "Registration service is currently unavailable. Please try again later.");
+                var errorMsg = "Registration service is currently unavailable. Please try again later.";
                 _logger.LogWarning(hEx, "API service unavailable during registration");
+                
+                if (isJsonRequest)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = errorMsg
+                    });
+                }
+                
+                ModelState.AddModelError(string.Empty, errorMsg);
             }
             catch (HttpRequestException hEx)
             {
-                ModelState.AddModelError(string.Empty, "Unable to connect to registration service. Please check your network connection.");
+                var errorMsg = "Unable to connect to registration service. Please check your network connection.";
                 _logger.LogError(hEx, "HttpRequest error during registration");
+                
+                if (isJsonRequest)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = errorMsg
+                    });
+                }
+                
+                ModelState.AddModelError(string.Empty, errorMsg);
             }
             catch (Exception ex)
             {
+                var errorMsg = "An error occurred during registration. Please try again.";
                 _logger.LogError(ex, $"Error during registration: {ex.GetType().Name} - {ex.Message}");
-                ModelState.AddModelError(string.Empty, "An error occurred during registration. Please try again.");
+                
+                if (isJsonRequest)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = errorMsg
+                    });
+                }
+                
+                ModelState.AddModelError(string.Empty, errorMsg);
+            }
+
+            if (isJsonRequest)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Registration failed. Please try again."
+                });
             }
 
             return View(model);

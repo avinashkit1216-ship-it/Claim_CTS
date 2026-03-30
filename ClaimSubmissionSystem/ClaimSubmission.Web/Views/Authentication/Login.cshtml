@@ -280,7 +280,16 @@
             .login-wrapper {
                 padding: 10px;
             }
+
+            
         }
+        .reg-nav {
+                text-align: center;
+                margin-top: 15px;
+                color : #94a3b8;
+                font-size: 13px;
+                line-height: 1.6;
+            }
     </style>
 </head>
 <body>
@@ -331,6 +340,8 @@
                     </div>
 
                     <button type="submit" class="btn btn-login w-100">Sign In</button>
+                    @* <a asp-action="Register" asp-controller="Authentication" class="btn btn-link w-100">Don't have an account? Sign Up</a> *@
+                    <p class = "reg-nav"> Don't have an account? <a asp-action="Register" asp-controller="Authentication">Sign Up</a></p>
                 </form>
 
                 <div class="divider"></div>
@@ -343,6 +354,38 @@
     </div>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/auth-storage.js"></script>
+    <script>
+        // Handle login form submission to store credentials in localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    // Store the username in session storage for pre-fill on next visit
+                    const username = document.querySelector('input[name="Username"]')?.value;
+                    if (username) {
+                        sessionStorage.setItem('lastUsername', username);
+                    }
+                });
+            }
+
+            // Restore last username if available
+            const lastUsername = sessionStorage.getItem('lastUsername');
+            if (lastUsername) {
+                const usernameInput = document.querySelector('input[name="Username"]');
+                if (usernameInput) {
+                    usernameInput.value = lastUsername;
+                    usernameInput.focus();
+                }
+            }
+
+            // Check if user is already authenticated via localStorage
+            if (authStorage && authStorage.isAuthenticated()) {
+                console.log('User already authenticated, redirecting to dashboard');
+                window.location.href = '/Claim/Index';
+            }
+        });
+    </script>
 </body>
 </html>
 

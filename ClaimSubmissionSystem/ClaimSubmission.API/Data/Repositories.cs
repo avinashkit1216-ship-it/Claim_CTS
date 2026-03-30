@@ -337,5 +337,58 @@ namespace ClaimSubmission.API.Data
                 throw;
             }
         }
+
+        public async Task<bool> EmailExistsAsync(string email)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var count = await connection.QueryFirstOrDefaultAsync<int>(
+                    "SELECT COUNT(*) FROM Users WHERE Email = @Email",
+                    new { Email = email }
+                );
+                return count > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error checking if email exists: {email}");
+                throw;
+            }
+        }
+
+        public async Task<bool> UsernameExistsAsync(string username)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                var count = await connection.QueryFirstOrDefaultAsync<int>(
+                    "SELECT COUNT(*) FROM Users WHERE Username = @Username",
+                    new { Username = username }
+                );
+                return count > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error checking if username exists: {username}");
+                throw;
+            }
+        }
+
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_connectionString);
+                return await connection.QueryFirstOrDefaultAsync<User>(
+                    "SELECT * FROM Users WHERE Email = @Email",
+                    new { Email = email }
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving user by email: {email}");
+                throw;
+            }
+        }
     }
 }

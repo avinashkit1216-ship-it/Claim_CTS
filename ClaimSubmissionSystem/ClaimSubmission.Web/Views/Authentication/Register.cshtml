@@ -697,6 +697,7 @@
     </div>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/auth-storage.js"></script>
     <script>
         // Password visibility toggle
         function togglePasswordVisibility(elementId) {
@@ -760,14 +761,181 @@
             }
         }
 
-        // Form submission handling
+        // AJAX Form submission handling with localStorage integration
         const form = document.querySelector('form');
+        const registerBtn = document.getElementById('registerBtn');
+        const alertContainer = document.querySelector('.register-body');
+
         if (form) {
-            form.addEventListener('submit', function() {
-                const registerBtn = document.getElementById('registerBtn');
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault(); // Prevent default form submission
+
+                // Validate form first
+                if (!form.checkValidity() === false) {
+                    e.stopPropagation();
+                }
+
+                // Disable the button
                 registerBtn.disabled = true;
+                const originalButtonText = registerBtn.textContent;
                 registerBtn.textContent = 'Creating Account...';
+
+                try {
+                    // Get form data
+                    const formData = new FormData(form);
+                    const registration = gatherFormData(formData);
+
+                    console.log('Submitting registration data:', { 
+                        email: registration.email, 
+                        username: registration.username 
+                    });
+
+                    // Get the anti-forgery token
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                    const headers = {
+                        'Content-Type': 'application/json'
+                    };
+                    if (token) {
+                        headers['X-CSRF-Token'] = token;
+                    }
+
+                    // Submit via AJAX
+                    const response = await fetch('/Authentication/Register', {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(registration)
+                    });
+
+                    const responseData = await response.json();
+
+                    if (response.ok) {
+                        // Registration successful
+                        console.log('Registration successful:', responseData);
+
+                        // Store user data and token in localStorage
+                        if (responseData.data) {
+                            const success = authStorage.storeSession(responseData.data);
+                            if (success) {
+                                console.log('User session stored in localStorage');
+
+                                // Show success message
+                                showSuccessMessage('Account created successfully! Redirecting to dashboard...');
+
+                                // Redirect to home/dashboard after 1.5 seconds
+                                setTimeout(function() {
+                                    window.location.href = '/Claim/Index';
+                                }, 1500);
+                            } else {
+                                showErrorMessage('Failed to store session. Please try logging in manually.');
+                                registerBtn.disabled = false;
+                                registerBtn.textContent = originalButtonText;
+                            }
+                        } else {
+                            showErrorMessage('Invalid response from server. Please try again.');
+                            registerBtn.disabled = false;
+                            registerBtn.textContent = originalButtonText;
+                        }
+                    } else {
+                        // Registration failed
+                        console.error('Registration failed:', responseData);
+                        const errorMessage = responseData.message || 
+                                           (responseData.errors && Object.values(responseData.errors)[0]) || 
+                                           'Registration failed. Please try again.';
+                        showErrorMessage(errorMessage);
+                        
+                        registerBtn.disabled = false;
+                        registerBtn.textContent = originalButtonText;
+                    }
+                } catch (error) {
+                    console.error('Error during registration:', error);
+                    showErrorMessage('An error occurred. Please check your connection and try again.');
+                    
+                    registerBtn.disabled = false;
+                    registerBtn.textContent = originalButtonText;
+                }
             });
+        }
+
+        /**
+         * Gather form data into a structured object
+         */
+        function gatherFormData(formData) {
+            return {
+                fullName: formData.get('FullName'),
+                email: formData.get('Email'),
+                phoneNumber: formData.get('PhoneNumber') || '',
+                username: formData.get('Username') || '',
+                password: formData.get('Password'),
+                confirmPassword: formData.get('ConfirmPassword'),
+                dateOfBirth: formData.get('DateOfBirth') || null,
+                gender: formData.get('Gender') || '',
+                country: formData.get('Country') || '',
+                referralCode: formData.get('ReferralCode') || '',
+                acceptTermsAndConditions: formData.get('AcceptTermsAndConditions') === 'on',
+                acceptPrivacyPolicy: formData.get('AcceptPrivacyPolicy') === 'on',
+                acceptMarketingEmails: formData.get('AcceptMarketingEmails') === 'on'
+            };
+        }
+
+        /**
+         * Show success message
+         */
+        function showSuccessMessage(message) {
+            removeExistingAlert();
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show';
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = `
+                <div style="display: flex; align-items: center;">
+                    <span style="font-size: 20px; margin-right: 12px;">✓</span>
+                    <div>
+                        <strong>Success!</strong><br/>
+                        ${message}
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="filter: invert(1) grayscale(0) brightness(1.8);"></button>
+            `;
+            
+            const registerBody = document.querySelector('.register-body');
+            registerBody.insertBefore(alertDiv, registerBody.firstChild);
+
+            // Auto-dismiss after 3 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        }
+
+        /**
+         * Show error message
+         */
+        function showErrorMessage(message) {
+            removeExistingAlert();
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = `
+                <strong>⚠️ Registration Failed!</strong>
+                <div style="margin-top: 8px;">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="filter: invert(1) grayscale(0) brightness(1.8);"></button>
+            `;
+            
+            const registerBody = document.querySelector('.register-body');
+            registerBody.insertBefore(alertDiv, registerBody.firstChild);
+
+            // Scroll to alert
+            alertDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        /**
+         * Remove existing alert messages
+         */
+        function removeExistingAlert() {
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
         }
 
         // Real-time validation feedback

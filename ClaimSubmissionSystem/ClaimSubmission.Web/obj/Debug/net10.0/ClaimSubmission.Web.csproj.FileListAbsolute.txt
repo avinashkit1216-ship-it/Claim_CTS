@@ -98,3 +98,5 @@
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/hnpc62bd0u-{0}-0rn1fj2m0v-0rn1fj2m0v.gz
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/6rr5jbal07-{0}-zbf3dhga3d-zbf3dhga3d.gz
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/8tmfdd8sjy-{0}-zbf3dhga3d-zbf3dhga3d.gz
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/zmju9brul4-{0}-poh0y2kujd-poh0y2kujd.gz
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/empc2na3i4-{0}-ubvrg1z7ay-ubvrg1z7ay.gz
