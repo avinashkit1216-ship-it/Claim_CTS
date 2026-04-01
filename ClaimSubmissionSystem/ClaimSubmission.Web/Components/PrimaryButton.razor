@@ -1,0 +1,37 @@
+@{
+    /* Button Component - Consistent button styling and behavior */
+    /* Usage: <PrimaryButton OnClick="HandleClick" Loading="isLoading">Save</PrimaryButton> */
+}
+
+<button class="btn btn-primary @CssClass" 
+        type="@ButtonType" 
+        disabled="@(Disabled || Loading)"
+        @onclick="OnClick">
+    @if (Loading)
+    {
+        <span class="spinner spinner-sm me-2" role="status">
+            <span class="sr-only">Loading...</span>
+        </span>
+    }
+    @ChildContent
+</button>
+
+@code {
+    [Parameter]
+    public string? CssClass { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; } = false;
+
+    [Parameter]
+    public bool Loading { get; set; } = false;
+
+    [Parameter]
+    public string? ButtonType { get; set; } = "button";
+
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

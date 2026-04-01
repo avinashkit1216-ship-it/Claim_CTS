@@ -1,0 +1,36 @@
+@{
+    /* EmptyState Component - Display empty state message */
+    /* Usage: <EmptyState Title="No Claims" Message="You haven't submitted any claims yet." /> */
+}
+
+<div class="empty-state">
+    <div class="empty-state-icon">@IconEmoji</div>
+    @if (!string.IsNullOrEmpty(Title))
+    {
+        <h3 class="empty-state-title">@Title</h3>
+    }
+    @if (!string.IsNullOrEmpty(Message))
+    {
+        <p class="empty-state-text">@Message</p>
+    }
+    @if (ActionContent != null)
+    {
+        <div class="empty-state-action">
+            @ActionContent
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public string? Message { get; set; }
+
+    [Parameter]
+    public RenderFragment? ActionContent { get; set; }
+
+    [Parameter]
+    public string? IconEmoji { get; set; } = "📋";
+}

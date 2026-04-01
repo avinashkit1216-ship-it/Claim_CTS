@@ -22,6 +22,46 @@ build_property._RazorSourceGeneratorDebug =
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
+[/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/Components/AlertBox.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9BbGVydEJveC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/Components/Card.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9DYXJkLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/Components/DataTable.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9EYXRhVGFibGUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/Components/EmptyState.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9FbXB0eVN0YXRlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/Components/FormGroup.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9Gb3JtR3JvdXAucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/Components/LoadingSpinner.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9Mb2FkaW5nU3Bpbm5lci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/Components/PrimaryButton.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QcmltYXJ5QnV0dG9uLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/Components/SecondaryButton.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9TZWNvbmRhcnlCdXR0b24ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/Components/Section.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9TZWN0aW9uLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/Components/StatusBadge.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9TdGF0dXNCYWRnZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/Views/Authentication/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXV0aGVudGljYXRpb24vTG9naW4uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 

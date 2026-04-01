@@ -1,0 +1,50 @@
+@{
+    /* FormGroup Component - Consistent form label + input pattern */
+    /* Usage: <FormGroup Label="Email" Required="true" ErrorMessage="@errors">
+                <input type="email" class="form-control" />
+             </FormGroup> */
+}
+
+<div class="form-group">
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <label class="form-label">
+            @Label
+            @if (Required)
+            {
+                <span class="text-danger" aria-label="required">*</span>
+            }
+        </label>
+    }
+    
+    <div class="form-control-wrapper">
+        @ChildContent
+    </div>
+    
+    @if (!string.IsNullOrEmpty(HelpText) && string.IsNullOrEmpty(ErrorMessage))
+    {
+        <small class="form-hint d-block mt-1">@HelpText</small>
+    }
+    
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="invalid-feedback d-block mt-1">@ErrorMessage</div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? Label { get; set; }
+
+    [Parameter]
+    public bool Required { get; set; } = false;
+
+    [Parameter]
+    public string? HelpText { get; set; }
+
+    [Parameter]
+    public string? ErrorMessage { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

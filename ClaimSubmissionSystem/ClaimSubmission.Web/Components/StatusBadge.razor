@@ -1,0 +1,37 @@
+@{
+    /* StatusBadge Component - Status indicator badge */
+    /* Usage: <StatusBadge Status="Approved" /> */
+}
+
+@if (!string.IsNullOrEmpty(Status))
+{
+    var badgeClass = Status.ToLower() switch
+    {
+        "approved" => "badge-success",
+        "pending" => "badge-warning",
+        "rejected" or "denied" => "badge-danger",
+        "processing" => "badge-info",
+        "draft" => "badge-secondary",
+        _ => "badge-primary"
+    };
+    
+    var icon = Status.ToLower() switch
+    {
+        "approved" => "✓",
+        "pending" => "⏳",
+        "rejected" or "denied" => "✕",
+        "processing" => "⟳",
+        "draft" => "📝",
+        _ => "●"
+    };
+
+    <span class="badge @badgeClass" title="Status: @Status">
+        <span>@icon</span>
+        <span>@Status</span>
+    </span>
+}
+
+@code {
+    [Parameter]
+    public string? Status { get; set; }
+}

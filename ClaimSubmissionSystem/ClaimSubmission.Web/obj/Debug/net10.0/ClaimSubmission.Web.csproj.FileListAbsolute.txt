@@ -100,3 +100,11 @@
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/8tmfdd8sjy-{0}-zbf3dhga3d-zbf3dhga3d.gz
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/zmju9brul4-{0}-poh0y2kujd-poh0y2kujd.gz
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/empc2na3i4-{0}-ubvrg1z7ay-ubvrg1z7ay.gz
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/e6itmjt6pz-{0}-rlvcp9icbj-rlvcp9icbj.gz
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/EmbeddedAttribute.cs
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/ValidatableTypeAttribute.cs
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/sqt26o8xhl-{0}-xtjk9xaz21-xtjk9xaz21.gz
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/heqmkrvyo5-{0}-en1lz3emk6-en1lz3emk6.gz
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/xp9ll4gbch-{0}-s35o8389rh-s35o8389rh.gz
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/gcbwlivgek-{0}-j8lzlu28q6-j8lzlu28q6.gz
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.Web/obj/Debug/net10.0/compressed/tll9guiukf-{0}-u1n4jc5v46-u1n4jc5v46.gz

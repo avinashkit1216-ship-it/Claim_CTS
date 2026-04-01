@@ -699,6 +699,15 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/auth-storage.js"></script>
     <script>
+        /**
+         * DEBUG: Check if authStorage is loaded
+         */
+        if (typeof authStorage !== 'undefined') {
+            console.log('authStorage module loaded successfully');
+        } else {
+            console.error('authStorage module failed to load');
+        }
+
         // Password visibility toggle
         function togglePasswordVisibility(elementId) {
             const input = document.getElementById(elementId);

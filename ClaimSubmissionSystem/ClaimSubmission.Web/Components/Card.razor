@@ -1,0 +1,49 @@
+@{
+    /* Card Component - Reusable card container */
+    /* Usage: <Card Title="Claims" IconClass="bi-file-earmark">
+                Card content here
+             </Card> */
+}
+
+<div class="card @CssClass">
+    @if (!string.IsNullOrEmpty(Title) || !string.IsNullOrEmpty(IconClass))
+    {
+        <div class="card-header">
+            <div class="d-flex align-items-center gap-2">
+                @if (!string.IsNullOrEmpty(IconClass))
+                {
+                    <i class="bi @IconClass"></i>
+                }
+                <h5 class="card-title mb-0">@Title</h5>
+            </div>
+        </div>
+    }
+    
+    <div class="card-body">
+        @ChildContent
+    </div>
+    
+    @if (FooterContent != null)
+    {
+        <div class="card-footer">
+            @FooterContent
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public string? IconClass { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? FooterContent { get; set; }
+
+    [Parameter]
+    public string? CssClass { get; set; }
+}

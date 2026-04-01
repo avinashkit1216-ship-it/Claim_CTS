@@ -63,5 +63,18 @@
     "CreatedDate": "2026-03-30T09:35:32.4040302Z",
     "LastModifiedBy": null,
     "LastModifiedDate": null
+  },
+  {
+    "ClaimId": 8,
+    "ClaimNumber": "CLM-0010",
+    "PatientName": "UMA MAGESHWARI K",
+    "ProviderName": "APOLLO",
+    "DateOfService": "2006-10-01T00:00:00",
+    "ClaimAmount": 1000,
+    "ClaimStatus": "Approved",
+    "CreatedBy": 1,
+    "CreatedDate": "2026-03-31T09:14:54.6714706Z",
+    "LastModifiedBy": null,
+    "LastModifiedDate": null
   }
 ]

@@ -1,0 +1,240 @@
+// ImprovedProgram.cs - Updated API Configuration with All Fixes
+// This replaces the existing Program.cs in ClaimSubmission.API
+
+using ClaimSubmission.API.Data;
+using ClaimSubmission.API.Data.LocalStorage;
+using ClaimSubmission.API.Services;
+using ClaimSubmission.API.Middleware;
+using ClaimSubmission.API.Validators;
+using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// ============================================================
+// SECURITY CONFIGURATION
+// ============================================================
+
+// Authentication with JWT
+var jwtKey = builder.Configuration["Jwt:Key"] 
+    ?? throw new InvalidOperationException("JWT Key not configured. Use dotnet user-secrets set \"Jwt:Key\" \"<value>\"");
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "ClaimSubmissionAPI";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "ClaimSubmissionClients";
+
+var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = securityKey,
+            ValidateIssuer = true,
+            ValidIssuer = jwtIssuer,
+            ValidateAudience = true,
+            ValidAudience = jwtAudience,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+        options.Challenge = "Bearer";
+        options.SaveToken = true;
+    });
+
+builder.Services.AddAuthorization();
+
+// ============================================================
+// RATE LIMITING
+// ============================================================
+builder.Services.AddRateLimiter(rateLimiterOptions =>
+{
+    rateLimiterOptions.AddFixedWindowLimiter(policyName: "fixed", options =>
+    {
+        options.PermitLimit = 100;
+        options.Window = TimeSpan.FromMinutes(1);
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = 2;
+    });
+    
+    rateLimiterOptions.AddSlidingWindowLimiter(policyName: "sliding", options =>
+    {
+        options.PermitLimit = 50;
+        options.Window = TimeSpan.FromSeconds(30);
+        options.SegmentsPerWindow = 2;
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = 2;
+    });
+    
+    rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
+
+// ============================================================
+// API SERVICES
+// ============================================================
+builder.Services.AddOpenApi();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// ============================================================
+// RESPONSE COMPRESSION
+// ============================================================
+builder.Services.AddResponseCompression(options =>
+{
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
+    options.MimeTypes = new[]
+    {
+        "application/json",
+        "application/xml",
+        "text/plain",
+        "text/xml"
+    };
+});
+
+// ============================================================
+// CACHING (Redis or Memory)
+// ============================================================
+var redisConnection = builder.Configuration.GetConnectionString("Redis");
+if (!string.IsNullOrEmpty(redisConnection))
+{
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisConnection;
+        options.InstanceName = "ClaimSubmission_";
+    });
+}
+else
+{
+    // Fallback to distributed memory cache
+    builder.Services.AddDistributedMemoryCache();
+}
+
+builder.Services.AddScoped<ICacheService, DistributedCacheService>();
+
+// ============================================================
+// VALIDATION
+// ============================================================
+builder.Services.AddValidatorsFromAssemblyContaining(typeof(CreateClaimRequestValidator));
+builder.Services.AddFluentValidationAutoValidation();
+
+// ============================================================
+// REPOSITORY & SERVICES
+// ============================================================
+builder.Services.AddSingleton<LocalStorageService>();
+builder.Services.AddScoped<IClaimsRepository, LocalClaimsRepository>();
+builder.Services.AddScoped<IAuthRepository, LocalAuthRepository>();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
+
+// ============================================================
+// CORS POLICY
+// ============================================================
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowWeb", policyBuilder =>
+    {
+        var origins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+            ?? new[] { "http://localhost:5277", "https://localhost:7277" };
+        
+        policyBuilder
+            .WithOrigins(origins)
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+});
+
+// ============================================================
+// LOGGING
+// ============================================================
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Logging.AddEventLog();
+}
+
+// ============================================================
+// BUILD APP
+// ============================================================
+var app = builder.Build();
+
+// ============================================================
+// MIDDLEWARE PIPELINE
+// ============================================================
+
+// Response compression
+app.UseResponseCompression();
+
+// Add global exception handling
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+
+// HTTPS redirect (all environments)
+app.UseHttpsRedirection();
+
+// HSTS (production only)
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
+
+// Rate limiting
+app.UseRateLimiter();
+
+// API Documentation
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "Claim Submission API");
+    });
+    
+    // Seed test data in development
+    try
+    {
+        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation("Initializing local storage data seeding...");
+        await DataSeeder.SeedTestUsersAsync(builder.Configuration, logger);
+    }
+    catch (Exception ex)
+    {
+        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Error seeding test data during startup");
+    }
+}
+
+// Routing and CORS
+app.UseRouting();
+app.UseCors("AllowWeb");
+
+// Authentication and Authorization
+app.UseAuthentication();
+app.UseAuthorization();
+
+// ============================================================
+// ENDPOINTS
+// ============================================================
+
+// Health check endpoint
+app.MapGet("/health", () => new
+{
+    status = "healthy",
+    timestamp = DateTime.UtcNow,
+    environment = app.Environment.EnvironmentName,
+    version = "1.0.0"
+}).WithName("HealthCheck").WithOpenApi();
+
+// Root endpoint
+app.MapGet("/", () =>
+    "ClaimSubmission API v1.0 is running. Visit /swagger or /openapi to explore the API.")
+    .WithName("Root").WithOpenApi();
+
+// API controllers
+app.MapControllers();
+
+app.Run();

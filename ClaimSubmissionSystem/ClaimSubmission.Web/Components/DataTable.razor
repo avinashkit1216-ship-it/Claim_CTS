@@ -1,0 +1,77 @@
+@{
+    /* DataTable Component - Responsive data table with actions */
+    /* Usage: <DataTable Columns="@columns" Rows="@rows" /> */
+}
+
+@using System.Collections.Generic
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        @if (Columns != null && Columns.Count > 0)
+        {
+            <thead>
+                <tr>
+                    @foreach (var column in Columns)
+                    {
+                        <th>@column</th>
+                    }
+                    @if (ActionsTemplate != null)
+                    {
+                        <th>Actions</th>
+                    }
+                </tr>
+            </thead>
+        }
+        
+        <tbody>
+            @if (Rows != null && Rows.Count > 0)
+            {
+                @foreach (var row in Rows)
+                {
+                    <tr>
+                        @if (Columns != null)
+                        {
+                            @foreach (var column in Columns)
+                            {
+                                <td>
+                                    @if (row.ContainsKey(column))
+                                    {
+                                        @row[column]
+                                    }
+                                </td>
+                            }
+                        }
+                        @if (ActionsTemplate != null)
+                        {
+                            <td>
+                                @ActionsTemplate(row)
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="@(Columns?.Count ?? 0)" class="text-center text-muted py-4">
+                        @EmptyMessage
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter]
+    public IReadOnlyList<string>? Columns { get; set; }
+
+    [Parameter]
+    public IReadOnlyList<Dictionary<string, object>>? Rows { get; set; }
+
+    [Parameter]
+    public RenderFragment<Dictionary<string, object>>? ActionsTemplate { get; set; }
+
+    [Parameter]
+    public string? EmptyMessage { get; set; } = "No data available";
+}

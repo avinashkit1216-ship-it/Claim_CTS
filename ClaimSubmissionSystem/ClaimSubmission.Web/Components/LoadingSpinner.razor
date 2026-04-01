@@ -1,0 +1,25 @@
+@{
+    /* LoadingSpinner Component - Show loading state */
+    /* Usage: <LoadingSpinner Visible="isLoading" Message="Loading data..." /> */
+}
+
+@if (Visible)
+{
+    <div class="text-center py-5">
+        <div class="spinner mb-3" role="status">
+            <span class="sr-only">@Message</span>
+        </div>
+        @if (!string.IsNullOrEmpty(Message))
+        {
+            <p class="text-muted">@Message</p>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool Visible { get; set; } = false;
+
+    [Parameter]
+    public string? Message { get; set; } = "Loading...";
+}

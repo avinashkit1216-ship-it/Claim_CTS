@@ -1,0 +1,59 @@
+@using System.Collections.Generic
+
+@{
+    /* AlertBox Component - Display alerts with different types */
+    /* Usage: <AlertBox AlertType="success" Message="Operation successful!" Dismissible="true" /> */
+}
+
+@if (!string.IsNullOrEmpty(Message) || ChildContent != null)
+{
+    <div class="alert alert-@AlertType alert-dismissible fade show animate-slide-in" role="alert">
+        <div class="d-flex align-items-start gap-3">
+            <span class="alert-icon">
+                @switch (AlertType)
+                {
+                    case "success":
+                        <span>✅</span>
+                        break;
+                    case "danger":
+                        <span>⚠️</span>
+                        break;
+                    case "warning":
+                        <span>⚡</span>
+                        break;
+                    case "info":
+                        <span>ℹ️</span>
+                        break;
+                }
+            </span>
+            <div style="flex: 1;">
+                @if (!string.IsNullOrEmpty(Message))
+                {
+                    <div>@Message</div>
+                }
+                @if (ChildContent != null)
+                {
+                    @ChildContent
+                }
+            </div>
+        </div>
+        @if (Dismissible)
+        {
+            <button type="button" class="btn-close alert-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string AlertType { get; set; } = "info";
+
+    [Parameter]
+    public string? Message { get; set; }
+
+    [Parameter]
+    public bool Dismissible { get; set; } = true;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

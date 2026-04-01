@@ -1,31 +1,253 @@
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Dashboard";
     bool isAuthenticated = Context.Session.GetString("IsAuthenticated") == "true";
+    var userName = Context.Session.GetString("FullName") ?? "User";
 }
 
-<div class="text-center">
-    @if (isAuthenticated)
-    {
-        <h1 class="display-4">Welcome, @Context.Session.GetString("FullName")!</h1>
-        <p class="lead">You are logged in to the Claim Submission System</p>
-        <div class="mt-4">
-            <a href="@Url.Action("List", "Claim")" class="btn btn-primary btn-lg mx-2">
-                <i class="bi bi-list-check"></i> View Claims
-            </a>
-            <a href="@Url.Action("Add", "Claim")" class="btn btn-success btn-lg mx-2">
-                <i class="bi bi-plus-circle"></i> Add New Claim
-            </a>
+@if (isAuthenticated)
+{
+    <!-- Authenticated Dashboard -->
+    <div id="main-content" class="pt-4">
+        <!-- Welcome Hero Section -->
+        <div class="hero mb-8">
+            <div class="hero-content">
+                <h1 class="hero-title">Welcome back, @userName! 👋</h1>
+                <p class="hero-subtitle">Your Claim Submission System dashboard is ready. Manage your healthcare claims with ease.</p>
+            </div>
         </div>
-    }
-    else
-    {
-        <h1 class="display-4">Welcome to Claim Submission System</h1>
-        <p class="lead">Please log in to access the system</p>
-        <div class="mt-4">
-            <a href="@Url.Action("Login", "Authentication")" class="btn btn-primary btn-lg">
-                <i class="bi bi-box-arrow-in-right"></i> Login
-            </a>
+
+        <!-- Quick Actions -->
+        <div class="row mb-8">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="mb-4">
+                            <i class="bi bi-plus-circle-fill" style="font-size: 3rem; color: var(--color-success);"></i>
+                        </div>
+                        <h5>Submit a New Claim</h5>
+                        <p class="text-muted mb-4">Start a new claim submission with our streamlined form.</p>
+                        <a href="@Url.Action("Add", "Claim")" class="btn btn-success btn-lg">
+                            <i class="bi bi-plus-circle"></i> New Claim
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="mb-4">
+                            <i class="bi bi-list-check" style="font-size: 3rem; color: var(--color-primary);"></i>
+                        </div>
+                        <h5>View Your Claims</h5>
+                        <p class="text-muted mb-4">Review and manage all your submitted claims in one place.</p>
+                        <a href="@Url.Action("List", "Claim")" class="btn btn-primary btn-lg">
+                            <i class="bi bi-list-check"></i> View Claims
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <p class="mt-4">Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    }
-</div>
+
+        <!-- Dashboard Stats -->
+        <div class="row mb-8">
+            <div class="col-md-3 mb-4">
+                <div class="card card-stat">
+                    <div class="card-body">
+                        <div class="stat-value text-primary">0</div>
+                        <div class="stat-label">Pending Claims</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card card-stat">
+                    <div class="card-body">
+                        <div class="stat-value text-success">0</div>
+                        <div class="stat-label">Approved</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card card-stat">
+                    <div class="card-body">
+                        <div class="stat-value text-warning">0</div>
+                        <div class="stat-label">In Review</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card card-stat">
+                    <div class="card-body">
+                        <div class="stat-value text-info">0</div>
+                        <div class="stat-label">Total Claims</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Information Cards -->
+        <div class="row">
+            <div class="col-lg-6 mb-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="bi bi-info-circle-fill"></i> Getting Started
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p>Here are some tips to get the most out of your account:</p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">✓ Keep your personal information up to date</li>
+                            <li class="mb-2">✓ Submit claims promptly for faster processing</li>
+                            <li class="mb-2">✓ Use our templates for consistent submissions</li>
+                            <li class="mb-2">✓ Download claim receipts for your records</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="bi bi-shield-check"></i> Secure & Compliant
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p>Your data is protected with enterprise-grade security:</p>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">🔒 HIPAA Compliant</li>
+                            <li class="mb-2">🔐 256-bit Encryption</li>
+                            <li class="mb-2">📋 Audit Logging</li>
+                            <li class="mb-2">✅ Regular Security Audits</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Unauthenticated Landing Page -->
+    <div id="main-content" class="pt-4">
+        <!-- Hero Section -->
+        <div class="hero mb-8">
+            <div class="hero-content">
+                <h1 class="hero-title">Professional Healthcare Claims Management</h1>
+                <p class="hero-subtitle">
+                    Streamline your claim submission process with our secure, HIPAA-compliant platform.
+                    Submit, track, and manage healthcare claims with ease.
+                </p>
+                <div class="mt-6" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="@Url.Action("Login", "Authentication")" class="btn btn-primary btn-lg">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </a>
+                    <a href="@Url.Action("Register", "Authentication")" class="btn btn-secondary btn-lg">
+                        <i class="bi bi-person-plus"></i> Create Account
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="mb-12">
+            <h2 class="text-center mb-8">Why Choose Our Platform?</h2>
+            <div class="row">
+                <div class="col-md-4 mb-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--color-primary);">
+                                <i class="bi bi-lightning-fill"></i>
+                            </div>
+                            <h5>Fast Processing</h5>
+                            <p class="text-muted">
+                                Swift claim processing with real-time status updates. Track your submissions every step of the way.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--color-secondary);">
+                                <i class="bi bi-shield-lock-fill"></i>
+                            </div>
+                            <h5>Secure & Compliant</h5>
+                            <p class="text-muted">
+                                Enterprise-grade security with HIPAA compliance, 256-bit encryption, and regular audits.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--color-success);">
+                                <i class="bi bi-graph-up"></i>
+                            </div>
+                            <h5>Easy Analytics</h5>
+                            <p class="text-muted">
+                                Comprehensive dashboards and reports to monitor your claim submissions and outcomes.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--color-warning);">
+                                <i class="bi bi-headset"></i>
+                            </div>
+                            <h5>24/7 Support</h5>
+                            <p class="text-muted">
+                                Dedicated support team available round the clock to assist with your questions and concerns.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--color-info);">
+                                <i class="bi bi-cloud-check"></i>
+                            </div>
+                            <h5>Cloud-Based</h5>
+                            <p class="text-muted">
+                                Access your claims from anywhere, anytime. Seamless synchronization across all your devices.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--color-primary);">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </div>
+                            <h5>Automated Workflow</h5>
+                            <p class="text-muted">
+                                Intelligent workflow automation reduces manual work and minimizes processing errors.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="card mb-8" style="background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%); border: none;">
+            <div class="card-body text-center py-8">
+                <h3 class="text-white mb-4">Ready to Get Started?</h3>
+                <p class="text-white mb-6">Join thousands of healthcare professionals using our platform</p>
+                <a href="@Url.Action("Register", "Authentication")" class="btn" style="background-color: white; color: var(--color-primary); font-weight: 600;">
+                    Create Your Account Now
+                </a>
+            </div>
+        </div>
+    </div>
+}
