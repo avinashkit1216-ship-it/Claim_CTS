@@ -3,6 +3,7 @@ using ClaimSubmission.API.DTOs;
 using ClaimSubmission.API.Services;
 using ClaimSubmission.API.Data;
 using ClaimSubmission.API.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ClaimSubmission.API.Controllers
 {
@@ -35,6 +36,7 @@ namespace ClaimSubmission.API.Controllers
         /// </summary>
         /// <param name="request">Login credentials</param>
         /// <returns>User information and authentication token</returns>
+        [AllowAnonymous]
         [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -133,6 +135,7 @@ namespace ClaimSubmission.API.Controllers
         /// </summary>
         /// <param name="request">Registration details</param>
         /// <returns>User information and authentication token on success</returns>
+        [AllowAnonymous]
         [HttpPost("register")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -305,6 +308,32 @@ namespace ClaimSubmission.API.Controllers
                 }
                 return StatusCode(StatusCodes.Status500InternalServerError, 
                     new { error = "An error occurred during registration" });
+            }
+        }
+
+        /// <summary>
+        /// Logout endpoint - invalidates user session
+        /// </summary>
+        /// <returns>Logout confirmation</returns>
+        [Authorize]
+        [HttpPost("logout")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public IActionResult Logout()
+        {
+            try
+            {
+                _logger.LogInformation("User logout request received");
+                
+                // Return successful logout response
+                return Ok(new { message = "Logout successful", success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error during logout: {ex.GetType().Name} - {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, 
+                    new { error = "An error occurred during logout" });
             }
         }
     }

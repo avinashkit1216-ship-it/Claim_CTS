@@ -2,6 +2,9 @@ using ClaimSubmission.API.Data;
 using ClaimSubmission.API.Data.LocalStorage;
 using ClaimSubmission.API.Services;
 using ClaimSubmission.API.Middleware;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +24,34 @@ builder.Services.AddScoped<IAuthRepository, LocalAuthRepository>();
 // Add business services
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IPasswordHashService, PasswordHashService>();
+
+// Configure JWT Bearer Authentication
+var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured");
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "ClaimSubmissionAPI";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "ClaimSubmissionClients";
+var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = securityKey,
+        ValidateIssuer = true,
+        ValidIssuer = jwtIssuer,
+        ValidateAudience = true,
+        ValidAudience = jwtAudience,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero // Strict lifetime validation
+    };
+});
+
+builder.Services.AddAuthorization();
 
 // Add CORS policy
 builder.Services.AddCors(options =>
@@ -70,6 +101,7 @@ else
 
 app.UseRouting();
 app.UseCors("AllowWeb");
+app.UseAuthentication();
 app.UseAuthorization();
 
 // Add default root endpoint

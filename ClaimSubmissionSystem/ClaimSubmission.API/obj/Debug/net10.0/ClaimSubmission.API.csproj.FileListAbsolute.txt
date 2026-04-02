@@ -52,3 +52,6 @@
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.API/bin/Debug/net10.0/FluentValidation.dll
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.API/bin/Debug/net10.0/FluentValidation.AspNetCore.dll
 /workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.API/bin/Debug/net10.0/FluentValidation.DependencyInjectionExtensions.dll
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.API/bin/Debug/net10.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.API/bin/Debug/net10.0/Microsoft.IdentityModel.Protocols.dll
+/workspaces/Claim_CTS/ClaimSubmissionSystem/ClaimSubmission.API/bin/Debug/net10.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll

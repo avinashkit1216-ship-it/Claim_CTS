@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using ClaimSubmission.API.Data;
 using ClaimSubmission.API.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ClaimSubmission.API.Controllers
 {
     /// <summary>
     /// Claims API controller for managing claim submissions
     /// </summary>
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class ClaimsController : ControllerBase

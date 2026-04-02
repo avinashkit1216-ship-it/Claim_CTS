@@ -11,6 +11,7 @@ namespace ClaimSubmission.Web.Controllers
     /// Claims controller for managing claims
     /// User must be authenticated to access these endpoints
     /// </summary>
+    [Authorize]
     public class ClaimController : Controller
     {
         private readonly IClaimApiService _claimApiService;

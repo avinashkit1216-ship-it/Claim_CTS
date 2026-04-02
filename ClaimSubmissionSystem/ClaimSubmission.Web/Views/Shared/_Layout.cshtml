@@ -81,9 +81,11 @@
                                     <li><a class="dropdown-item" href="#">My Profile</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
-                                        <a class="dropdown-item text-danger" asp-area="" asp-controller="Authentication" asp-action="Logout">
-                                            <i class="bi bi-box-arrow-right"></i> Logout
-                                        </a>
+                                        <form method="post" asp-area="" asp-controller="Authentication" asp-action="Logout" class="m-0">
+                                            <button type="submit" class="dropdown-item text-danger w-100 text-start" style="border: none; background: none; cursor: pointer;">
+                                                <i class="bi bi-box-arrow-right"></i> Logout
+                                            </button>
+                                        </form>
                                     </li>
                                 </ul>
                             </li>

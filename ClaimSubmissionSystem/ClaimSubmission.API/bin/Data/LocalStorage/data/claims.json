@@ -48,8 +48,8 @@
     "ClaimStatus": "Approved",
     "CreatedBy": 1,
     "CreatedDate": "2026-03-30T09:34:32.4151992Z",
-    "LastModifiedBy": null,
-    "LastModifiedDate": null
+    "LastModifiedBy": 1,
+    "LastModifiedDate": "2026-04-02T05:40:38.8760993Z"
   },
   {
     "ClaimId": 7,
@@ -76,5 +76,18 @@
     "CreatedDate": "2026-03-31T09:14:54.6714706Z",
     "LastModifiedBy": null,
     "LastModifiedDate": null
+  },
+  {
+    "ClaimId": 9,
+    "ClaimNumber": "CLM--007",
+    "PatientName": "SUBHIKSHA",
+    "ProviderName": "SATYA",
+    "DateOfService": "2006-07-15T00:00:00",
+    "ClaimAmount": 1000,
+    "ClaimStatus": "Processing",
+    "CreatedBy": 1,
+    "CreatedDate": "2026-04-02T05:31:11.0686258Z",
+    "LastModifiedBy": 1,
+    "LastModifiedDate": "2026-04-02T05:40:10.4356001Z"
   }
 ]

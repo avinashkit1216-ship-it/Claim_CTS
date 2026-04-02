@@ -1,21 +1,24 @@
 using System;
 using System.Threading.Tasks;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using ClaimSubmission.Web.Models;
 using ClaimSubmission.Web.Services;
 
 namespace ClaimSubmission.Web.Controllers
 {
     /// <summary>
-    /// Authentication controller for user login/logout
+    /// Authentication controller for user login/logout with cookie-based authentication
     /// </summary>
     public class AuthenticationController : Controller
     {
-        private readonly IAuthenticationService _authService;
+        private readonly Services.IAuthenticationService _authService;
         private readonly ILogger<AuthenticationController> _logger;
 
-        public AuthenticationController(IAuthenticationService authService, ILogger<AuthenticationController> logger)
+        public AuthenticationController(Services.IAuthenticationService authService, ILogger<AuthenticationController> logger)
         {
             _authService = authService;
             _logger = logger;
@@ -27,7 +30,8 @@ namespace ClaimSubmission.Web.Controllers
         [AllowAnonymous]
         public IActionResult Login(string? returnUrl = null)
         {
-            if (HttpContext.Session.GetString("IsAuthenticated") == "true")
+            // If already authenticated, redirect to claims
+            if (User.Identity?.IsAuthenticated == true)
             {
                 return RedirectToAction("Index", "Claim");
             }
@@ -37,7 +41,7 @@ namespace ClaimSubmission.Web.Controllers
         }
 
         /// <summary>
-        /// Handle login submission
+        /// Handle login submission using ASP.NET Core cookie authentication
         /// </summary>
         [HttpPost]
         [AllowAnonymous]
@@ -55,7 +59,31 @@ namespace ClaimSubmission.Web.Controllers
 
                 if (user != null)
                 {
-                    // Store user information in session
+                    // Create claims for the authenticated user
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                        new Claim(ClaimTypes.Name, user.Username ?? ""),
+                        new Claim("FullName", user.FullName ?? ""),
+                        new Claim(ClaimTypes.Email, user.Email ?? ""),
+                        new Claim("UserToken", user.Token ?? "")
+                    };
+
+                    // Create claims identity
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var authProperties = new AuthenticationProperties
+                    {
+                        IsPersistent = false, // Session cookie only
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30)
+                    };
+
+                    // Sign in with cookie authentication
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity),
+                        authProperties);
+
+                    // Also store in session for backward compatibility with custom middleware
                     HttpContext.Session.SetString("UserId", user.UserId.ToString());
                     HttpContext.Session.SetString("Username", user.Username ?? string.Empty);
                     HttpContext.Session.SetString("FullName", user.FullName ?? string.Empty);
@@ -63,7 +91,7 @@ namespace ClaimSubmission.Web.Controllers
                     HttpContext.Session.SetString("UserToken", user.Token ?? string.Empty);
                     HttpContext.Session.SetString("IsAuthenticated", "true");
 
-                    _logger.LogInformation($"User '{model.Username}' logged in successfully");
+                    _logger.LogInformation($"User '{model.Username}' (ID: {user.UserId}) logged in successfully from {HttpContext.Connection.RemoteIpAddress}");
 
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                     {
@@ -75,13 +103,13 @@ namespace ClaimSubmission.Web.Controllers
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Invalid username or password");
-                    _logger.LogWarning($"Failed login attempt for user '{model.Username}'");
+                    _logger.LogWarning($"Failed login attempt for user '{model.Username}' from {HttpContext.Connection.RemoteIpAddress}");
                 }
             }
             catch (UnauthorizedAccessException)
             {
                 ModelState.AddModelError(string.Empty, "Invalid username or password");
-                _logger.LogWarning($"Unauthorized access for user '{model.Username}'");
+                _logger.LogWarning($"Unauthorized access for user '{model.Username}' from {HttpContext.Connection.RemoteIpAddress}");
             }
             catch (HttpRequestException hEx) when (hEx.InnerException is TimeoutException || 
                                                      hEx.Message.Contains("unavailable") ||
@@ -97,7 +125,7 @@ namespace ClaimSubmission.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error during login: {ex.GetType().Name} - {ex.Message}");
+                _logger.LogError(ex, $"Unexpected error during login: {ex.GetType().Name} - {ex.Message}");
                 ModelState.AddModelError(string.Empty, "An error occurred during login. Please try again.");
             }
 
@@ -119,7 +147,7 @@ namespace ClaimSubmission.Web.Controllers
         }
 
         /// <summary>
-        /// Handle registration submission
+        /// Handle registration submission with automatic login
         /// </summary>
         [HttpPost]
         [AllowAnonymous]
@@ -156,9 +184,32 @@ namespace ClaimSubmission.Web.Controllers
 
                 if (user != null)
                 {
-                    _logger.LogInformation($"User '{model.Email}' registered successfully");
+                    _logger.LogInformation($"User '{model.Email}' (ID: {user.UserId}) registered successfully from {HttpContext.Connection.RemoteIpAddress}");
                     
-                    // Store user information in session
+                    // Create claims for the newly registered user
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                        new Claim(ClaimTypes.Name, user.Username ?? ""),
+                        new Claim("FullName", user.FullName ?? ""),
+                        new Claim(ClaimTypes.Email, user.Email ?? ""),
+                        new Claim("UserToken", user.Token ?? "")
+                    };
+
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var authProperties = new AuthenticationProperties
+                    {
+                        IsPersistent = false,
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30)
+                    };
+
+                    // Sign in new user
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity),
+                        authProperties);
+
+                    // Also store in session for backward compatibility
                     HttpContext.Session.SetString("UserId", user.UserId.ToString());
                     HttpContext.Session.SetString("Username", user.Username ?? string.Empty);
                     HttpContext.Session.SetString("FullName", user.FullName ?? string.Empty);
@@ -172,21 +223,20 @@ namespace ClaimSubmission.Web.Controllers
                         return Json(new
                         {
                             success = true,
-                            message = "Registration successful!",
+                            message = "Registration and login successful!",
                             data = user
                         });
                     }
                     else
                     {
-                        // Redirect to login for form submissions
-                        TempData["SuccessMessage"] = "Registration successful! Please log in with your credentials.";
-                        return RedirectToAction("Login");
+                        // Redirect to claims page for form submissions
+                        return RedirectToAction("Index", "Claim");
                     }
                 }
                 else
                 {
                     var errorMsg = "Registration failed. Please try again.";
-                    _logger.LogWarning($"Failed registration attempt for email '{model.Email}'");
+                    _logger.LogWarning($"Failed registration attempt for email '{model.Email}' from {HttpContext.Connection.RemoteIpAddress}");
                     
                     if (isJsonRequest)
                     {
@@ -269,7 +319,7 @@ namespace ClaimSubmission.Web.Controllers
             catch (Exception ex)
             {
                 var errorMsg = "An error occurred during registration. Please try again.";
-                _logger.LogError(ex, $"Error during registration: {ex.GetType().Name} - {ex.Message}");
+                _logger.LogError(ex, $"Unexpected error during registration: {ex.GetType().Name} - {ex.Message}");
                 
                 if (isJsonRequest)
                 {
@@ -296,27 +346,41 @@ namespace ClaimSubmission.Web.Controllers
         }
 
         /// <summary>
-        /// Logout user
+        /// Logout user - clears authentication cookie and session
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Logout()
+        [Authorize]
+        public async Task<IActionResult> Logout()
         {
             try
             {
-                var username = HttpContext.Session.GetString("Username");
+                var username = User.FindFirst(ClaimTypes.Name)?.Value ?? "Unknown";
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Unknown";
                 
-                // Clear session
+                // Sign out from cookie authentication
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                
+                // Clear session as well for backward compatibility
                 HttpContext.Session.Clear();
                 
-                _logger.LogInformation($"User '{username}' logged out");
+                _logger.LogInformation($"User '{username}' (ID: {userId}) logged out successfully from {HttpContext.Connection.RemoteIpAddress}");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during logout");
+                _logger.LogError(ex, $"Error during logout: {ex.GetType().Name} - {ex.Message}");
             }
 
             return RedirectToAction("Login");
+        }
+
+        /// <summary>
+        /// Access Denied page
+        /// </summary>
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }
